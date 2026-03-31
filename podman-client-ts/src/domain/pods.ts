@@ -92,7 +92,7 @@ export class PodsManager extends Manager<Pod> {
 
   async get(podId: string): Promise<Pod> {
     const res = await this.client.get<Record<string, unknown>>(
-      `/pods/${encodeURIComponent(podId)}/json`
+      `/pods/${encodeURIComponent(podId)}/json`,
     );
     res.raiseForStatus(NotFound);
     return this.prepareModel(res.data);

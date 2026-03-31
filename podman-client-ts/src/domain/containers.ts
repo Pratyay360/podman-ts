@@ -24,7 +24,10 @@ export class Container extends PodmanResource {
 
   get ports(): Record<string, unknown> {
     return (
-      ((this.attrs["NetworkSettings"] as Record<string, unknown>)?.["Ports"] as Record<string, unknown>) ?? {}
+      ((this.attrs["NetworkSettings"] as Record<string, unknown>)?.["Ports"] as Record<
+        string,
+        unknown
+      >) ?? {}
     );
   }
 
@@ -92,7 +95,9 @@ export class Container extends PodmanResource {
     return res.data;
   }
 
-  async logs(options: { stdout?: boolean; stderr?: boolean; follow?: boolean } = {}): Promise<string> {
+  async logs(
+    options: { stdout?: boolean; stderr?: boolean; follow?: boolean } = {},
+  ): Promise<string> {
     const res = await this.client.get<string>(`/containers/${this.id}/logs`, {
       params: {
         stdout: options.stdout ?? true,
@@ -113,17 +118,21 @@ export class Container extends PodmanResource {
   }
 
   async diff(): Promise<Array<Record<string, unknown>>> {
-    const res = await this.client.get<Array<Record<string, unknown>>>(`/containers/${this.id}/changes`);
+    const res = await this.client.get<Array<Record<string, unknown>>>(
+      `/containers/${this.id}/changes`,
+    );
     res.raiseForStatus();
     return res.data;
   }
 
-  async commit(options: {
-    repository?: string;
-    tag?: string;
-    message?: string;
-    author?: string;
-  } = {}): Promise<Record<string, unknown>> {
+  async commit(
+    options: {
+      repository?: string;
+      tag?: string;
+      message?: string;
+      author?: string;
+    } = {},
+  ): Promise<Record<string, unknown>> {
     const res = await this.client.post<Record<string, unknown>>(`/commit`, {
       params: {
         container: this.id,
@@ -164,7 +173,7 @@ export class ContainersManager extends Manager<Container> {
   declare run: (
     image: string,
     command?: string | string[],
-    options?: RunOptions
+    options?: RunOptions,
   ) => Promise<Container | string | Uint8Array>;
 
   async exists(key: string): Promise<boolean> {
@@ -175,7 +184,7 @@ export class ContainersManager extends Manager<Container> {
   async get(key: string, options: { compatible?: boolean } = {}): Promise<Container> {
     const res = await this.client.get<Record<string, unknown>>(
       `/containers/${encodeURIComponent(key)}/json`,
-      { compatible: options.compatible }
+      { compatible: options.compatible },
     );
     res.raiseForStatus(NotFound);
     return this.prepareModel(res.data);

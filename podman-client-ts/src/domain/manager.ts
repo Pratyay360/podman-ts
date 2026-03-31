@@ -11,7 +11,7 @@ export abstract class PodmanResource {
   constructor(
     attrs: Record<string, unknown> = {},
     client: APIClient,
-    manager?: Manager<PodmanResource>
+    manager?: Manager<PodmanResource>,
   ) {
     this.attrs = attrs;
     this.client = client;
@@ -48,14 +48,18 @@ export abstract class Manager<T extends PodmanResource> {
 
   /** Instantiate a resource from raw API attributes. */
   protected prepareModel(attrs: Record<string, unknown>): T {
-    return new (this.resourceClass())(attrs, this.client, this as unknown as Manager<PodmanResource>) as T;
+    return new (this.resourceClass())(
+      attrs,
+      this.client,
+      this as unknown as Manager<PodmanResource>,
+    ) as T;
   }
 
   /** Subclasses return their concrete resource constructor. */
   protected abstract resourceClass(): new (
     attrs: Record<string, unknown>,
     client: APIClient,
-    manager: Manager<PodmanResource>
+    manager: Manager<PodmanResource>,
   ) => T;
 
   abstract exists(key: string): Promise<boolean>;

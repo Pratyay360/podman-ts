@@ -39,29 +39,29 @@ and/or use the pre-commit hook: https://github.com/renovatebot/pre-commit-hooks
 */
 
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
 
   /*************************************************
    ****** Global/general configuration options *****
    *************************************************/
 
   // Re-use predefined sets of configuration options to DRY
-  "extends": [
+  extends: [
     // https://github.com/containers/automation/blob/main/renovate/defaults.json5
-    "github>containers/automation//renovate/defaults.json5"
+    "github>containers/automation//renovate/defaults.json5",
   ],
 
   // Permit automatic rebasing when base-branch changes by more than
   // one commit.
-  "rebaseWhen": "behind-base-branch",
+  rebaseWhen: "behind-base-branch",
 
   /*************************************************
    *** Repository-specific configuration options ***
    *************************************************/
 
   // Don't leave dep. update. PRs "hanging", assign them to people.
-  "assignees": ["inknos"],
+  assignees: ["inknos"],
   "pre-commit": {
-    "enabled": true
+    enabled: true,
   },
 }

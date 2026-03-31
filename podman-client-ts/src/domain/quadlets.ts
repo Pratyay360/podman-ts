@@ -6,15 +6,29 @@ import { NotFound, PodmanError } from "../errors";
 export type QuadletFileItem = [string, string | Uint8Array] | string;
 
 export class Quadlet extends PodmanResource {
-  get name(): string { return (this.attrs["Name"] ?? this.attrs["name"] ?? "") as string; }
-  get unitName(): string { return (this.attrs["UnitName"] ?? this.attrs["unitName"] ?? "") as string; }
-  get path(): string { return (this.attrs["Path"] ?? this.attrs["path"] ?? "") as string; }
-  get status(): string { return (this.attrs["Status"] ?? this.attrs["status"] ?? "") as string; }
-  get application(): string { return (this.attrs["App"] ?? this.attrs["app"] ?? "") as string; }
+  get name(): string {
+    return (this.attrs["Name"] ?? this.attrs["name"] ?? "") as string;
+  }
+  get unitName(): string {
+    return (this.attrs["UnitName"] ?? this.attrs["unitName"] ?? "") as string;
+  }
+  get path(): string {
+    return (this.attrs["Path"] ?? this.attrs["path"] ?? "") as string;
+  }
+  get status(): string {
+    return (this.attrs["Status"] ?? this.attrs["status"] ?? "") as string;
+  }
+  get application(): string {
+    return (this.attrs["App"] ?? this.attrs["app"] ?? "") as string;
+  }
 
-  toString(): string { return `<Quadlet: ${this.name}>`; }
+  toString(): string {
+    return `<Quadlet: ${this.name}>`;
+  }
 
-  async delete(options: { force?: boolean; ignore?: boolean; reloadSystemd?: boolean } = {}): Promise<string[]> {
+  async delete(
+    options: { force?: boolean; ignore?: boolean; reloadSystemd?: boolean } = {},
+  ): Promise<string[]> {
     return (this.manager as QuadletsManager).delete(this.name, options);
   }
 
@@ -30,7 +44,9 @@ export interface QuadletDeleteOptions {
 }
 
 export class QuadletsManager extends Manager<Quadlet> {
-  protected resourceClass() { return Quadlet; }
+  protected resourceClass() {
+    return Quadlet;
+  }
 
   async exists(key: string): Promise<boolean> {
     const res = await this.client.get(`/quadlets/${encodeURIComponent(key)}/exists`);
@@ -67,7 +83,7 @@ export class QuadletsManager extends Manager<Quadlet> {
 
   async delete(
     name?: string | Quadlet | null,
-    options: QuadletDeleteOptions & { all?: boolean } = {}
+    options: QuadletDeleteOptions & { all?: boolean } = {},
   ): Promise<string[]> {
     if (!name && !options.all) throw new PodmanError("Quadlet name or all=true must be provided.");
     const n = name instanceof Quadlet ? name.name : name;
@@ -85,9 +101,12 @@ export class QuadletsManager extends Manager<Quadlet> {
 
   async install(
     files: QuadletFileItem | QuadletFileItem[],
-    options: { replace?: boolean; reloadSystemd?: boolean } = {}
+    options: { replace?: boolean; reloadSystemd?: boolean } = {},
   ): Promise<Record<string, unknown>> {
-    const items = Array.isArray(files) && !isTuple(files) ? files as QuadletFileItem[] : [files as QuadletFileItem];
+    const items =
+      Array.isArray(files) && !isTuple(files)
+        ? (files as QuadletFileItem[])
+        : [files as QuadletFileItem];
     if (items.length === 0) throw new PodmanError("files must not be empty.");
 
     const params = {
@@ -97,7 +116,11 @@ export class QuadletsManager extends Manager<Quadlet> {
 
     // Single tar file path
     const first = items[0];
-    if (items.length === 1 && typeof first === "string" && (first.endsWith(".tar") || first.endsWith(".tar.gz"))) {
+    if (
+      items.length === 1 &&
+      typeof first === "string" &&
+      (first.endsWith(".tar") || first.endsWith(".tar.gz"))
+    ) {
       const tarBytes = await Bun.file(first).arrayBuffer();
       const res = await this.client.post<Record<string, unknown>>("/quadlets", {
         params,
@@ -113,9 +136,10 @@ export class QuadletsManager extends Manager<Quadlet> {
     for (const item of items) {
       if (isTuple(item)) {
         const [filename, content] = item as [string, string | Uint8Array];
-        const blob = typeof content === "string"
-          ? new Blob([content], { type: "text/plain" })
-          : new Blob([content]);
+        const blob =
+          typeof content === "string"
+            ? new Blob([content], { type: "text/plain" })
+            : new Blob([content]);
         form.append(filename, blob, filename);
       } else {
         const filepath = item as string;

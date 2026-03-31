@@ -1,0 +1,14 @@
+{
+  "name": "podman-ts",
+  "private": true,
+  "type": "module",
+  "module": "index.ts",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "oxfmt": "^0.42.0",
+    "oxlint": "^1.57.0"
+  },
+  "peerDependencies": {
+    "typescript": "^6.0.2"
+  }
+}

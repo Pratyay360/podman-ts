@@ -61,7 +61,7 @@ function resolveConnection(rawUrl: string): {
   if (rawUrl.startsWith("http+ssh://") || rawUrl.startsWith("ssh://")) {
     throw new Error(
       "SSH connections require an SSH tunnel. " +
-        "Set up the tunnel first and connect via tcp:// or http+unix://."
+        "Set up the tunnel first and connect via tcp:// or http+unix://.",
     );
   }
 
@@ -74,7 +74,7 @@ export class APIResponse<T = unknown> {
 
   constructor(
     private readonly _status: number,
-    private readonly _body: unknown
+    private readonly _body: unknown,
   ) {}
 
   get status(): number {
@@ -137,7 +137,7 @@ export class APIClient {
   private async request<T>(
     method: string,
     path: string,
-    config: RequestConfig = {}
+    config: RequestConfig = {},
   ): Promise<APIResponse<T>> {
     const url = this.buildUrl(path, config.compatible ?? false, config.params);
 

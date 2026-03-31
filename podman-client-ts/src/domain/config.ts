@@ -24,7 +24,9 @@ export class ServiceConnection {
     this.attrs = attrs;
   }
 
-  get id(): string { return this.name; }
+  get id(): string {
+    return this.name;
+  }
 
   get url(): URL {
     const raw = this.attrs.uri ?? this.attrs.URI ?? "";
@@ -39,7 +41,9 @@ export class ServiceConnection {
     return this.attrs.IsMachine ?? false;
   }
 
-  toString(): string { return `<ServiceConnection: '${this.id}'>`; }
+  toString(): string {
+    return `<ServiceConnection: '${this.id}'>`;
+  }
 }
 
 function getXdgConfigHome(): string {
@@ -80,7 +84,9 @@ export class PodmanConfig {
     // Legacy TOML format
     const engine = this.attrs["engine"] as Record<string, unknown> | undefined;
     if (engine) {
-      const destinations = engine["service_destinations"] as Record<string, ServiceConnectionAttrs> | undefined;
+      const destinations = engine["service_destinations"] as
+        | Record<string, ServiceConnectionAttrs>
+        | undefined;
       if (destinations) {
         for (const [key, val] of Object.entries(destinations)) {
           result[key] = new ServiceConnection(key, val);
@@ -91,7 +97,9 @@ export class PodmanConfig {
     // New JSON format (takes precedence)
     const connection = this.attrs["Connection"] as Record<string, unknown> | undefined;
     if (connection) {
-      const destinations = connection["Connections"] as Record<string, ServiceConnectionAttrs> | undefined;
+      const destinations = connection["Connections"] as
+        | Record<string, ServiceConnectionAttrs>
+        | undefined;
       if (destinations) {
         for (const [key, val] of Object.entries(destinations)) {
           result[key] = new ServiceConnection(key, val);
@@ -106,7 +114,9 @@ export class PodmanConfig {
     const connection = this.attrs["Connection"] as Record<string, unknown> | undefined;
     if (connection) {
       const active = connection["Default"] as string | undefined;
-      const destinations = connection["Connections"] as Record<string, ServiceConnectionAttrs> | undefined;
+      const destinations = connection["Connections"] as
+        | Record<string, ServiceConnectionAttrs>
+        | undefined;
       if (active && destinations?.[active]) {
         return new ServiceConnection(active, destinations[active]);
       }
@@ -115,7 +125,9 @@ export class PodmanConfig {
     const engine = this.attrs["engine"] as Record<string, unknown> | undefined;
     if (engine) {
       const active = engine["active_service"] as string | undefined;
-      const destinations = engine["service_destinations"] as Record<string, ServiceConnectionAttrs> | undefined;
+      const destinations = engine["service_destinations"] as
+        | Record<string, ServiceConnectionAttrs>
+        | undefined;
       if (active && destinations?.[active]) {
         return new ServiceConnection(active, destinations[active]);
       }

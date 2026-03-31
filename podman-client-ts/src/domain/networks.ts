@@ -88,7 +88,7 @@ export class NetworksManager extends Manager<Network> {
 
   async get(key: string): Promise<Network> {
     const res = await this.client.get<Record<string, unknown>>(
-      `/networks/${encodeURIComponent(key)}/json`
+      `/networks/${encodeURIComponent(key)}/json`,
     );
     res.raiseForStatus(NotFound);
     return this.prepareModel(res.data);

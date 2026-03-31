@@ -66,7 +66,8 @@ export class PodmanClient {
       if (options.connection) {
         const config = new PodmanConfig();
         const svc = config.services[options.connection];
-        if (!svc) throw new Error(`Connection '${options.connection}' not found in containers.conf`);
+        if (!svc)
+          throw new Error(`Connection '${options.connection}' not found in containers.conf`);
         baseUrl = svc.url.toString();
       } else {
         // Check active service from config
@@ -86,9 +87,7 @@ export class PodmanClient {
   /** Create a PodmanClient from environment variables (CONTAINER_HOST or DOCKER_HOST). */
   static fromEnv(options: Omit<PodmanClientOptions, "baseUrl"> = {}): PodmanClient {
     const baseUrl =
-      process.env["CONTAINER_HOST"] ??
-      process.env["DOCKER_HOST"] ??
-      defaultSocketPath();
+      process.env["CONTAINER_HOST"] ?? process.env["DOCKER_HOST"] ?? defaultSocketPath();
     return new PodmanClient({ ...options, baseUrl });
   }
 
@@ -132,14 +131,26 @@ export class PodmanClient {
     return (this._system ??= new SystemManager(this.api));
   }
 
-  async ping(): Promise<boolean> { return this.system.ping(); }
-  async version(): Promise<Record<string, unknown>> { return this.system.version(); }
-  async info(): Promise<Record<string, unknown>> { return this.system.info(); }
-  async df(): Promise<Record<string, unknown>> { return this.system.df(); }
+  async ping(): Promise<boolean> {
+    return this.system.ping();
+  }
+  async version(): Promise<Record<string, unknown>> {
+    return this.system.version();
+  }
+  async info(): Promise<Record<string, unknown>> {
+    return this.system.info();
+  }
+  async df(): Promise<Record<string, unknown>> {
+    return this.system.df();
+  }
 
-  close(): void { /* no-op — Bun fetch has no persistent pool to drain */ }
+  close(): void {
+    /* no-op — Bun fetch has no persistent pool to drain */
+  }
 
-  [Symbol.dispose](): void { this.close(); }
+  [Symbol.dispose](): void {
+    this.close();
+  }
 }
 
 /** Alias for Docker SDK compatibility. */

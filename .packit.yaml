@@ -90,7 +90,6 @@ jobs:
     dist_git_branches:
       - fedora-branched # rawhide updates are created automatically
 
-
   # Test linting on the codebase
   # This test might break based on the OS and lint used, so we follow fedora-latest as a reference
   - job: tests
@@ -102,7 +101,6 @@ jobs:
       - fedora-latest-stable
     skip_build: true
 
-
   # test unit test coverage
   - job: tests
     trigger: pull_request
@@ -112,7 +110,6 @@ jobs:
     targets:
       - fedora-latest-stable
     skip_build: true
-
 
   # TODO: test integration test coverage
 
@@ -136,8 +133,8 @@ jobs:
     tf_extra_params:
       environments:
         - artifacts:
-          - type: repository-file
-            id: https://copr.fedorainfracloud.org/coprs/rhcontainerbot/podman-next/repo/fedora-$releasever/rhcontainerbot-podman-next-fedora-$releasever.repo
+            - type: repository-file
+              id: https://copr.fedorainfracloud.org/coprs/rhcontainerbot/podman-next/repo/fedora-$releasever/rhcontainerbot-podman-next-fedora-$releasever.repo
     manual_trigger: true
     labels:
       - pnext

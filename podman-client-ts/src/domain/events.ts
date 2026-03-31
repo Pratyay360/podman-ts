@@ -18,9 +18,7 @@ export class EventsManager {
    *
    * @yields Raw event strings, or decoded objects when decode=true.
    */
-  async *list(
-    options: EventsListOptions = {}
-  ): AsyncGenerator<string | Record<string, unknown>> {
+  async *list(options: EventsListOptions = {}): AsyncGenerator<string | Record<string, unknown>> {
     const res = await this.client.get<string>("/events", {
       params: {
         filters: prepareFilters(options.filters),

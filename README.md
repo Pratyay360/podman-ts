@@ -1,4 +1,5 @@
 # podman-py
+
 [![PyPI Latest Version](https://img.shields.io/pypi/v/podman)](https://pypi.org/project/podman/)
 
 This python package is a library of bindings to use the RESTful API of [Podman](https://github.com/containers/podman).
@@ -24,9 +25,9 @@ pip install podman
 
 ## Dependencies
 
-* For runtime dependencies, see \[dependencies\] in [pyproject.toml](https://github.com/containers/podman-py/blob/main/pyproject.toml)
-* For testing and development dependencies, see \[project.optional.dependencies\] in [pyproject.toml](https://github.com/containers/podman-py/blob/main/pyproject.toml)
-  * The package is split in \[progress\_bar\], \[docs\], and \[test\]
+- For runtime dependencies, see \[dependencies\] in [pyproject.toml](https://github.com/containers/podman-py/blob/main/pyproject.toml)
+- For testing and development dependencies, see \[project.optional.dependencies\] in [pyproject.toml](https://github.com/containers/podman-py/blob/main/pyproject.toml)
+  - The package is split in \[progress_bar\], \[docs\], and \[test\]
 
 ## Example usage
 

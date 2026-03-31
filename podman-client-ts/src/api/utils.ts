@@ -7,7 +7,7 @@ type FilterValue = string | string[] | boolean | number | null | undefined;
  * Normalizes all values to Record<string, string[]>.
  */
 export function prepareFilters(
-  filters?: Record<string, FilterValue> | string[] | null
+  filters?: Record<string, FilterValue> | string[] | null,
 ): string | undefined {
   if (!filters) return undefined;
 

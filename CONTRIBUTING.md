@@ -1,6 +1,6 @@
 # How to contribute
 
-Thank you in your interest in the podman-py project.  We need your help to make
+Thank you in your interest in the podman-py project. We need your help to make
 it successful.
 
 You may also want to look at:
@@ -129,7 +129,7 @@ able to connect locally.
 ```
 
 Most of the times, if you can run `ssh localhost exit` successfully your tests
- will run.
+will run.
 
 ## Submitting changes
 
@@ -165,8 +165,8 @@ Most of the times, if you can run `ssh localhost exit` successfully your tests
   make the ride as smooth as possible.
 - Use Google style python [docstrings](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings)
   - A general exception is made for kwargs where we use the Sphinx extension of adding a section
-      "Keyword Arguments" and documenting the accepted keyword arguments, their type and usage.
-      Example: kwarg1 (int): Description of kwarg1
+    "Keyword Arguments" and documenting the accepted keyword arguments, their type and usage.
+    Example: kwarg1 (int): Description of kwarg1
 
 Again, thank you for your interest and participation.
 Jhon Honce `<jhonce at redhat dot com>`

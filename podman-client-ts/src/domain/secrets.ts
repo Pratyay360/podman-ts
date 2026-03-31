@@ -33,7 +33,11 @@ export class SecretsManager extends Manager<Secret> {
     return Secret;
   }
 
-  async create(name: string, data: Buffer | string, options: SecretCreateOptions = {}): Promise<Secret> {
+  async create(
+    name: string,
+    data: Buffer | string,
+    options: SecretCreateOptions = {},
+  ): Promise<Secret> {
     const res = await this.client.post<Record<string, unknown>>("/secrets/create", {
       params: { name, driver: options.driver, labels: options.labels },
       data: typeof data === "string" ? data : data.toString("base64"),
@@ -50,7 +54,7 @@ export class SecretsManager extends Manager<Secret> {
 
   async get(secretId: string): Promise<Secret> {
     const res = await this.client.get<Record<string, unknown>>(
-      `/secrets/${encodeURIComponent(secretId)}/json`
+      `/secrets/${encodeURIComponent(secretId)}/json`,
     );
     res.raiseForStatus(NotFound);
     return this.prepareModel(res.data);

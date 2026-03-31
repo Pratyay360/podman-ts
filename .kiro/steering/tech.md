@@ -1,26 +1,31 @@
 # Tech Stack
 
 ## Language & Runtime
+
 - Python >= 3.9
 - Supports CPython 3.9, 3.10, 3.11, 3.12, 3.13
 
 ## Core Dependencies
+
 - `requests >= 2.24` — HTTP client for API calls
 - `urllib3` — underlying transport
 - `tomli >= 1.2.3` — TOML parsing (Python < 3.11 only)
 - `rich >= 12.5.1` — optional progress bar support
 
 ## Build System
+
 - `setuptools` with `pyproject.toml` + `setup.cfg`
 - Version sourced dynamically from `podman/version.py`
 
 ## Testing
+
 - `pytest` — test runner
 - `requests-mock` — HTTP mocking for unit tests
 - `coverage` — code coverage (minimum 85% required, enforced at 80% in CI)
 - `tox` — test environment management
 
 ## Linting & Formatting
+
 - `ruff` — linting and formatting (replaces black + flake8 + pylint)
   - Line length: 100
   - Quote style: preserve
@@ -65,6 +70,7 @@ tox -e py -- --pnext -m pnext ...
 ```
 
 ## Environment Variables
+
 - `PODMAN_LOG_LEVEL` — log level for tests (default: `INFO`)
 - `PODMAN_BINARY` — path to podman binary used in integration tests (default: `podman`)
 - `DEBUG` — debug flag (default: `0`)

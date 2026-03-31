@@ -2,6 +2,14 @@
   "name": "podman-client",
   "version": "5.8.0",
   "description": "TypeScript bindings for the Podman RESTful API (libpod) — powered by Bun",
+  "keywords": [
+    "bun",
+    "containers",
+    "docker",
+    "libpod",
+    "podman"
+  ],
+  "license": "Apache-2.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -9,8 +17,6 @@
     "typecheck": "tsc --noEmit",
     "test": "bun test"
   },
-  "keywords": ["podman", "containers", "docker", "libpod", "bun"],
-  "license": "Apache-2.0",
   "devDependencies": {
     "@types/bun": "latest",
     "typescript": "^5.4.0"

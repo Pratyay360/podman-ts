@@ -27,15 +27,18 @@ export class Manifest extends PodmanResource {
     return this.attrs["schemaVersion"] as number | undefined;
   }
 
-  async add(images: Array<Image | string>, options: {
-    all?: boolean;
-    annotation?: Record<string, string>;
-    arch?: string;
-    features?: string[];
-    os?: string;
-    osVersion?: string;
-    variant?: string;
-  } = {}): Promise<void> {
+  async add(
+    images: Array<Image | string>,
+    options: {
+      all?: boolean;
+      annotation?: Record<string, string>;
+      arch?: string;
+      features?: string[];
+      os?: string;
+      osVersion?: string;
+      variant?: string;
+    } = {},
+  ): Promise<void> {
     const data = prepareBody({
       all: options.all,
       annotation: options.annotation,
@@ -55,13 +58,16 @@ export class Manifest extends PodmanResource {
     await this.reload();
   }
 
-  async push(destination: string, options: { all?: boolean; authConfig?: Record<string, string> } = {}): Promise<void> {
+  async push(
+    destination: string,
+    options: { all?: boolean; authConfig?: Record<string, string> } = {},
+  ): Promise<void> {
     const headers: Record<string, string> = {
       "X-Registry-Auth": options.authConfig ? encodeAuthHeader(options.authConfig) : "",
     };
     const res = await this.client.post(
       `/manifests/${this.quotedName}/registry/${encodeURIComponent(destination)}`,
-      { params: { all: options.all, destination }, headers }
+      { params: { all: options.all, destination }, headers },
     );
     res.raiseForStatus();
   }
@@ -84,21 +90,22 @@ export class Manifest extends PodmanResource {
 }
 
 export class ManifestsManager extends Manager<Manifest> {
-  protected resourceClass() { return Manifest; }
+  protected resourceClass() {
+    return Manifest;
+  }
 
   async create(name: string, images?: Array<Image | string>, all?: boolean): Promise<Manifest> {
     const params: Record<string, unknown> = {};
     if (images) {
       params["images"] = images.map((i) =>
-        i instanceof Image ? (i.attrs["RepoTags"] as string[])[0] : i
+        i instanceof Image ? (i.attrs["RepoTags"] as string[])[0] : i,
       );
     }
     if (all !== undefined) params["all"] = all;
 
-    const res = await this.client.post<{ Id: string }>(
-      `/manifests/${encodeURIComponent(name)}`,
-      { params }
-    );
+    const res = await this.client.post<{ Id: string }>(`/manifests/${encodeURIComponent(name)}`, {
+      params,
+    });
     res.raiseForStatus(ImageNotFound);
     const manifest = await this.get(res.data.Id);
     manifest.attrs["names"] = name;
@@ -113,7 +120,7 @@ export class ManifestsManager extends Manager<Manifest> {
 
   async get(key: string): Promise<Manifest> {
     const res = await this.client.get<Record<string, unknown>>(
-      `/manifests/${encodeURIComponent(key)}/json`
+      `/manifests/${encodeURIComponent(key)}/json`,
     );
     res.raiseForStatus(NotFound);
     const body = res.data;
@@ -128,7 +135,7 @@ export class ManifestsManager extends Manager<Manifest> {
   async removeManifest(name: string | Manifest): Promise<Record<string, unknown>> {
     const n = name instanceof Manifest ? name.name : name;
     const res = await this.client.delete<Record<string, unknown>>(
-      `/manifests/${encodeURIComponent(n)}`
+      `/manifests/${encodeURIComponent(n)}`,
     );
     res.raiseForStatus(ImageNotFound);
     return { ...res.data, ExitCode: res.status };

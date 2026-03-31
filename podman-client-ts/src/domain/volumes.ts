@@ -67,7 +67,7 @@ export class VolumesManager extends Manager<Volume> {
 
   async get(volumeId: string): Promise<Volume> {
     const res = await this.client.get<Record<string, unknown>>(
-      `/volumes/${encodeURIComponent(volumeId)}/json`
+      `/volumes/${encodeURIComponent(volumeId)}/json`,
     );
     res.raiseForStatus(NotFound);
     return this.prepareModel(res.data);

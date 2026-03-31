@@ -13,7 +13,7 @@ export class RegistryData extends PodmanResource {
     imageName: string,
     attrs: Record<string, unknown>,
     client: APIClient,
-    manager: Manager<PodmanResource>
+    manager: Manager<PodmanResource>,
   ) {
     super(attrs, client, manager);
     this.imageName = imageName;
@@ -42,12 +42,13 @@ export class RegistryData extends PodmanResource {
     }
 
     if (!os || !architecture) {
-      throw new InvalidArgument(`'${JSON.stringify(platform)}' is not a valid platform descriptor.`);
+      throw new InvalidArgument(
+        `'${JSON.stringify(platform)}' is not a valid platform descriptor.`,
+      );
     }
 
     return (
-      os === (this.attrs["Os"] as string) &&
-      architecture === (this.attrs["Architecture"] as string)
+      os === (this.attrs["Os"] as string) && architecture === (this.attrs["Architecture"] as string)
     );
   }
 }

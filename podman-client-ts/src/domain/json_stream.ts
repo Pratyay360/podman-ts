@@ -4,7 +4,7 @@ import { StreamParseError } from "../errors";
 
 /** Yield decoded JSON objects from an async iterable of text chunks. */
 export async function* jsonStream(
-  stream: AsyncIterable<string> | Iterable<string>
+  stream: AsyncIterable<string> | Iterable<string>,
 ): AsyncGenerator<unknown> {
   let buffer = "";
 
@@ -53,9 +53,7 @@ function tryParseJson(text: string): ParseResult | null {
 }
 
 /** Split a text stream on newlines and yield each line. */
-export async function* lineStream(
-  stream: AsyncIterable<string>
-): AsyncGenerator<string> {
+export async function* lineStream(stream: AsyncIterable<string>): AsyncGenerator<string> {
   let buffer = "";
   for await (const chunk of stream) {
     buffer += chunk;

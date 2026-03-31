@@ -88,7 +88,7 @@ export class ImagesManager extends Manager<Image> {
 
   async get(name: string): Promise<Image> {
     const res = await this.client.get<Record<string, unknown>>(
-      `/images/${encodeURIComponent(name)}/json`
+      `/images/${encodeURIComponent(name)}/json`,
     );
     res.raiseForStatus(ImageNotFound);
     return this.prepareModel(res.data);
@@ -131,17 +131,19 @@ export class ImagesManager extends Manager<Image> {
 
   async remove(
     name: string,
-    options: { force?: boolean } = {}
+    options: { force?: boolean } = {},
   ): Promise<Record<string, unknown>[]> {
     const res = await this.client.delete<Record<string, unknown>[]>(
       `/images/${encodeURIComponent(name)}`,
-      { params: { force: options.force } }
+      { params: { force: options.force } },
     );
     res.raiseForStatus(ImageNotFound);
     return res.data;
   }
 
-  async prune(options: { all?: boolean; filters?: Record<string, string> } = {}): Promise<Record<string, unknown>> {
+  async prune(
+    options: { all?: boolean; filters?: Record<string, string> } = {},
+  ): Promise<Record<string, unknown>> {
     const res = await this.client.post<Record<string, unknown>>("/images/prune", {
       params: {
         all: options.all,

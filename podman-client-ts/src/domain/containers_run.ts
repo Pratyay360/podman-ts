@@ -28,16 +28,30 @@ export class RunMixin {
   async run(
     image: string,
     command?: string | string[],
-    options: RunOptions = {}
+    options: RunOptions = {},
   ): Promise<Container | string | Uint8Array> {
-    const { stdout = true, stderr = false, remove = false, detach = false, stream = false, authConfig, platform, policy, ...createOpts } = options;
+    const {
+      stdout = true,
+      stderr = false,
+      remove = false,
+      detach = false,
+      stream = false,
+      authConfig,
+      platform,
+      policy,
+      ...createOpts
+    } = options;
 
     let container: Container;
     try {
       container = await this.create({ ...createOpts, image, command });
     } catch (e) {
       if (e instanceof ImageNotFound) {
-        await this.podmanClient?.images.pull(image, { authConfig, platform, policy: policy ?? "missing" });
+        await this.podmanClient?.images.pull(image, {
+          authConfig,
+          platform,
+          policy: policy ?? "missing",
+        });
         container = await this.create({ ...createOpts, image, command });
       } else {
         throw e;
@@ -50,7 +64,10 @@ export class RunMixin {
     if (detach) {
       if (remove) {
         // Fire-and-forget background removal
-        container.wait().then(() => container.remove()).catch(() => {});
+        container
+          .wait()
+          .then(() => container.remove())
+          .catch(() => {});
       }
       return container;
     }

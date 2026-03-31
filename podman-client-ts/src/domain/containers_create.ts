@@ -98,7 +98,11 @@ export function renderCreatePayload(opts: ContainerCreateOptions): Record<string
   if (opts.ports) {
     for (const [containerPort, hostPort] of Object.entries(opts.ports)) {
       const [port, proto] = containerPort.split("/");
-      portmappings.push({ container_port: parseInt(port, 10), protocol: proto ?? "tcp", host_port: hostPort });
+      portmappings.push({
+        container_port: parseInt(port, 10),
+        protocol: proto ?? "tcp",
+        host_port: hostPort,
+      });
     }
   }
 
