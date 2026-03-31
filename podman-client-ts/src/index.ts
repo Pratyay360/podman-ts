@@ -36,7 +36,7 @@ export { VERSION as API_VERSION, COMPATIBLE_VERSION, DEFAULT_CHUNK_SIZE } from "
 
 // ── Domain: Containers ────────────────────────────────────────────────────────
 export { Container, ContainersManager } from "./domain/containers";
-export type { ContainerListOptions, ContainerCreateOptions, RunOptions } from "./domain/containers";
+export type { ContainerListOptions, ContainerCreateOptions, RunOptions, LogOptions } from "./domain/containers";
 
 // ── Domain: Images ────────────────────────────────────────────────────────────
 export { Image, ImagesManager } from "./domain/images";

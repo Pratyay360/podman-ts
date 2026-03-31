@@ -1,8 +1,18 @@
 import { prepareFilters, prepareBody } from "../api/utils";
 import { Manager, PodmanResource } from "./manager";
-import { NotFound } from "../errors";
-import { CreateMixin, ContainerCreateOptions, renderCreatePayload } from "./containers_create";
-import { RunMixin, RunOptions } from "./containers_run";
+import { NotFound, APIError, ImageNotFound, ContainerError } from "../errors";
+import { ContainerCreateOptions, renderCreatePayload } from "./containers_create";
+import type { RunOptions } from "./containers_run";
+
+export interface LogOptions {
+  stream?: boolean;
+  stdout?: boolean;
+  stderr?: boolean;
+  follow?: boolean;
+  since?: string | number;
+  until?: string | number;
+  tail?: number | "all";
+}
 
 export class Container extends PodmanResource {
   get name(): string | undefined {
@@ -95,18 +105,45 @@ export class Container extends PodmanResource {
     return res.data;
   }
 
-  async logs(
-    options: { stdout?: boolean; stderr?: boolean; follow?: boolean } = {},
-  ): Promise<string> {
-    const res = await this.client.get<string>(`/containers/${this.id}/logs`, {
-      params: {
-        stdout: options.stdout ?? true,
-        stderr: options.stderr ?? true,
-        follow: options.follow ?? false,
-      },
-    });
+  async logs(opts: LogOptions & { stream: true }): Promise<AsyncIterable<string>>;
+  async logs(opts?: LogOptions): Promise<string>;
+  async logs(opts: LogOptions = {}): Promise<string | AsyncIterable<string>> {
+    const params: Record<string, unknown> = {
+      stdout: opts.stdout ?? true,
+      stderr: opts.stderr ?? true,
+      follow: opts.follow ?? false,
+      since: opts.since,
+      until: opts.until,
+      tail: opts.tail,
+    };
+    if (opts.stream) {
+      return this._streamLogs(params);
+    }
+    const res = await this.client.get<string>(`/containers/${this.id}/logs`, { params });
     res.raiseForStatus();
     return res.data;
+  }
+
+  private async *_streamLogs(params: Record<string, unknown>): AsyncIterable<string> {
+    const url = this.client.buildUrlPublic(`/containers/${this.id}/logs`, false, params);
+    const fetchOpts: RequestInit & { unix?: string } = {};
+    if ((this.client as unknown as { unix?: string }).unix) {
+      fetchOpts.unix = (this.client as unknown as { unix?: string }).unix;
+    }
+    const res = await fetch(url, fetchOpts);
+    if (!res.ok) throw new APIError(`Log stream error`, res.status);
+    const reader = res.body!.getReader();
+    const decoder = new TextDecoder();
+    let buf = "";
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split("\n");
+      buf = lines.pop()!;
+      for (const line of lines) yield line;
+    }
+    if (buf) yield buf;
   }
 
   async top(options: { psArgs?: string } = {}): Promise<Record<string, unknown>> {
@@ -168,13 +205,77 @@ export class ContainersManager extends Manager<Container> {
     return Container;
   }
 
-  // Provided by mixins — declared here for TypeScript awareness
-  declare create: (opts: ContainerCreateOptions) => Promise<Container>;
-  declare run: (
+  async create(opts: ContainerCreateOptions): Promise<Container> {
+    const payload = renderCreatePayload(opts);
+    const res = await this.client.post<{ Id: string }>("/containers/create", {
+      data: prepareBody(payload),
+      headers: { "Content-Type": "application/json" },
+    });
+    res.raiseForStatus(ImageNotFound);
+    return this.get(res.data.Id);
+  }
+
+  async run(
     image: string,
     command?: string | string[],
-    options?: RunOptions,
-  ) => Promise<Container | string | Uint8Array>;
+    options: RunOptions = {},
+  ): Promise<Container | string | Uint8Array> {
+    const {
+      stdout = true,
+      stderr = false,
+      remove = false,
+      detach = false,
+      authConfig,
+      platform,
+      policy,
+      ...createOpts
+    } = options;
+
+    let container: Container;
+    try {
+      container = await this.create({ ...createOpts, image, command });
+    } catch (e) {
+      if (e instanceof ImageNotFound) {
+        await (
+          this as unknown as {
+            podmanClient?: {
+              images: { pull: (id: string, opts: Record<string, unknown>) => Promise<unknown> };
+            };
+          }
+        ).podmanClient?.images.pull(image, {
+          authConfig,
+          platform,
+          policy: policy ?? "missing",
+        });
+        container = await this.create({ ...createOpts, image, command });
+      } else {
+        throw e;
+      }
+    }
+
+    await container.start();
+    await container.reload();
+
+    if (detach) {
+      if (remove) {
+        container
+          .wait()
+          .then(() => container.remove())
+          .catch(() => {});
+      }
+      return container;
+    }
+
+    const exitCode = await container.wait();
+    if (remove) await container.remove();
+
+    if (exitCode !== 0) {
+      throw new ContainerError(`Container exited with status ${exitCode}`, exitCode);
+    }
+
+    const logs = await container.logs({ stdout, stderr });
+    return logs;
+  }
 
   async exists(key: string): Promise<boolean> {
     const res = await this.client.get(`/containers/${encodeURIComponent(key)}/exists`);
@@ -219,8 +320,5 @@ export class ContainersManager extends Manager<Container> {
     return res.data;
   }
 }
-
-// Apply mixins onto ContainersManager
-Object.assign(ContainersManager.prototype, CreateMixin.prototype, RunMixin.prototype);
 
 export type { ContainerCreateOptions, RunOptions };

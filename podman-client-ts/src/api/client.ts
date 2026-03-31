@@ -3,7 +3,7 @@
  * Uses Bun's native fetch with Unix-socket support (no axios / node:http needed).
  */
 
-import { APIError, NotFound } from "../errors";
+import { APIError, NotFound, PodmanError } from "../errors";
 
 export interface APIClientOptions {
   /** Full URL to Podman service, e.g. "http+unix:///run/podman/podman.sock" */
@@ -12,6 +12,8 @@ export interface APIClientOptions {
   version?: string;
   /** Request timeout in milliseconds. */
   timeout?: number;
+  /** Max retry attempts on network-level errors. Default: 0 */
+  retries?: number;
 }
 
 export interface RequestConfig {
@@ -116,6 +118,7 @@ export class APIClient {
   readonly baseUrl: string;
   readonly version: string;
   private readonly timeout?: number;
+  private readonly retries: number;
   private readonly httpBase: string;
   private readonly unix?: string;
 
@@ -123,6 +126,7 @@ export class APIClient {
     this.baseUrl = options.baseUrl;
     this.version = options.version ?? DEFAULT_VERSION;
     this.timeout = options.timeout;
+    this.retries = options.retries ?? 0;
 
     const { httpBase, unix } = resolveConnection(options.baseUrl);
     this.httpBase = httpBase;
@@ -130,8 +134,34 @@ export class APIClient {
   }
 
   private buildUrl(path: string, compatible: boolean, params?: Record<string, unknown>): string {
-    const prefix = compatible ? `/v${this.version}/compat` : "/libpod";
+    const ver = this.version.replace(/^v/, "");
+    const prefix = compatible ? `/v${ver}/compat` : `/v${ver}/libpod`;
     return `${this.httpBase}${prefix}${path}${buildQuery(params)}`;
+  }
+
+  /** Expose buildUrl for testing purposes. */
+  buildUrlPublic(path: string, compatible: boolean, params?: Record<string, unknown>): string {
+    return this.buildUrl(path, compatible, params);
+  }
+
+  private sleep(ms: number): Promise<void> {
+    return new Promise((r) => setTimeout(r, ms));
+  }
+
+  private async fetchWithRetry(url: string, opts: RequestInit & { unix?: string }): Promise<Response> {
+    let delay = 100;
+    for (let attempt = 0; attempt <= this.retries; attempt++) {
+      try {
+        return await fetch(url, opts);
+      } catch (err) {
+        if (attempt === this.retries) {
+          throw new PodmanError(`Request failed after ${attempt + 1} attempt(s): ${err}`);
+        }
+        await this.sleep(Math.min(delay, 2000));
+        delay *= 2;
+      }
+    }
+    throw new PodmanError("Unreachable");
   }
 
   private async request<T>(
@@ -158,7 +188,7 @@ export class APIClient {
       fetchOptions.signal = AbortSignal.timeout(this.timeout);
     }
 
-    const res = await fetch(url, fetchOptions);
+    const res = await this.fetchWithRetry(url, fetchOptions);
 
     // Parse body — try JSON first, fall back to text
     let body: unknown;
@@ -186,6 +216,10 @@ export class APIClient {
 
   put<T = unknown>(path: string, config?: RequestConfig): Promise<APIResponse<T>> {
     return this.request<T>("PUT", path, config);
+  }
+
+  patch<T = unknown>(path: string, config?: RequestConfig): Promise<APIResponse<T>> {
+    return this.request<T>("PATCH", path, config);
   }
 
   head(path: string): Promise<APIResponse> {

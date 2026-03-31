@@ -1,11 +1,12 @@
 /**
  * PodmanConfig — reads podman-connections.json (and legacy containers.conf TOML).
- * In Bun, TOML parsing is built-in via Bun.TOML.
+ * Uses smol-toml for runtime-agnostic TOML parsing.
  */
 
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { homedir } from "os";
+import { parse as parseToml } from "smol-toml";
 
 export interface ServiceConnectionAttrs {
   uri?: string;
@@ -70,10 +71,10 @@ export class PodmanConfig {
     // Merge legacy TOML config if present
     if (existsSync(tomlPath)) {
       try {
-        const toml = Bun.TOML.parse(readFileSync(tomlPath, "utf-8"));
+        const toml = parseToml(readFileSync(tomlPath, "utf-8"));
         Object.assign(this.attrs, toml);
       } catch {
-        // ignore parse errors on legacy file
+        console.warn("[podman-client] Failed to parse containers.conf TOML — skipping.");
       }
     }
   }
