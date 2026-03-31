@@ -49,10 +49,10 @@
   - [x] 9.2 Create `podman-client-ts/src/__tests__/prepare-filters.test.ts` — unit + property tests for `prepareFilters` (empty, single-value, multi-value, array-of-string)
   - [x] 9.3 Create `podman-client-ts/src/__tests__/podman-config.test.ts` — unit + property tests for `PodmanConfig` (JSON parsing, TOML parsing, graceful TOML failure)
   - [x] 9.4 Create `podman-client-ts/src/__tests__/demux-output.test.ts` — unit + property tests for `demuxOutput` (stdout-only, stderr-only, interleaved)
-  - [ ] 9.5 Create `podman-client-ts/src/__tests__/containers-manager.test.ts` — unit tests for `ContainersManager.list` and `.get` with mocked `APIClient`
-  - [ ] 9.6 Create `podman-client-ts/src/__tests__/images-manager.test.ts` — unit tests for `ImagesManager.list` and `.get` with mocked `APIClient`
+  - [~] 9.5 Create `podman-client-ts/src/__tests__/containers-manager.test.ts` — unit tests for `ContainersManager.list` and `.get` with mocked `APIClient`
+  - [~] 9.6 Create `podman-client-ts/src/__tests__/images-manager.test.ts` — unit tests for `ImagesManager.list` and `.get` with mocked `APIClient`
   - [x] 9.7 Add `fast-check` to `devDependencies` and use it for property-based tests in the files above
-  - [ ] 9.8 Verify `bun test` runs all tests with zero failures
+  - [~] 9.8 Verify `bun test` runs all tests with zero failures
 
 - [ ] 10. Write `README.md`
-  - [ ] 10.1 Create `podman-client-ts/README.md` with installation, quick-start, `PodmanClientOptions` docs, architecture overview, and manager listing
+  - [~] 10.1 Create `podman-client-ts/README.md` with installation, quick-start, `PodmanClientOptions` docs, architecture overview, and manager listing
