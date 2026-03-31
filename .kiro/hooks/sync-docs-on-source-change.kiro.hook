@@ -1,0 +1,22 @@
+{
+  "enabled": true,
+  "name": "Sync Docs on Source Change",
+  "description": "Watches Python and TypeScript source files, plus key config files. When any change, asks the agent to update README or docs/ accordingly.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "podman/**/*.py",
+      "podman-client-ts/src/**/*.ts",
+      "setup.cfg",
+      "pyproject.toml",
+      "podman-client-ts/package.json"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A source file was just edited. Review the change and determine if any documentation needs to be updated. Check the README.md at the root and the docs/source/ folder. If the change affects public APIs, usage examples, configuration, or behavior that is documented, update the relevant docs to reflect the change. Only update docs if something is actually out of date — don't make unnecessary changes."
+  },
+  "workspaceFolderName": "podman-ts",
+  "shortName": "sync-docs-on-source-change"
+}
