@@ -1,7 +1,7 @@
-import { prepareBody, encodeAuthHeader } from "../api/utils";
-import { Manager, PodmanResource } from "./manager";
+import { encodeAuthHeader, prepareBody } from "../api/utils";
 import { ImageNotFound, NotFound } from "../errors";
 import { Image } from "./images";
+import { Manager, PodmanResource } from "./manager";
 
 export class Manifest extends PodmanResource {
   get id(): string | undefined {

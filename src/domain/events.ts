@@ -1,6 +1,6 @@
 /** EventsManager — stream Podman service events. */
 
-import { APIClient } from "../api/client";
+import type { APIClient } from "../api/client";
 import { prepareFilters, prepareTimestamp } from "../api/utils";
 
 export interface EventsListOptions {

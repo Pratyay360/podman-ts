@@ -1,7 +1,7 @@
+import type { Buffer } from "node:buffer";
 import { prepareBody } from "../api/utils";
-import { Manager, PodmanResource } from "./manager";
 import { NotFound } from "../errors";
-import { Buffer } from "node:buffer";
+import { Manager, PodmanResource } from "./manager";
 
 export class Secret extends PodmanResource {
   get id(): string | undefined {

@@ -1,9 +1,9 @@
 /** RunMixin — container run() logic ported from containers_run.py */
 
-import { Container } from "./containers";
-import { ContainerError, ImageNotFound } from "../errors";
-import type { ContainerCreateOptions } from "./containers_create";
 import type { APIClient } from "../api/client";
+import { ContainerError, ImageNotFound } from "../errors";
+import type { Container } from "./containers";
+import type { ContainerCreateOptions } from "./containers_create";
 
 export interface RunOptions extends Omit<ContainerCreateOptions, "image"> {
   stdout?: boolean;

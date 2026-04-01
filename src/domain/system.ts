@@ -1,4 +1,4 @@
-import { APIClient } from "../api/client";
+import type { APIClient } from "../api/client";
 import { prepareBody } from "../api/utils";
 
 export interface LoginOptions {
@@ -33,7 +33,7 @@ export class SystemManager {
     res.raiseForStatus();
     const body = res.data;
     if (options.apiVersion === false) {
-      delete body["APIVersion"];
+      body["APIVersion"] = undefined;
     }
     return body;
   }

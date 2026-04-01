@@ -5,7 +5,7 @@
  * Property 4: demuxOutput stdout/stderr partition
  */
 
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import fc from "fast-check";
 import { demuxOutput } from "../api/utils";
 

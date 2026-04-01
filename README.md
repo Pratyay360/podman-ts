@@ -56,13 +56,14 @@ const client = new PodmanClient({
   baseUrl: "http+unix:///run/user/1000/podman/podman.sock", // Direct URL
   connection: "my-remote-machine", // Named connection from containers.conf
   version: "5.0.0", // API version override
-  timeout: 5000,    // Request timeout in ms
+  timeout: 5000, // Request timeout in ms
 });
 ```
 
 ### Automatic Connection Discovery
 
 By default, `PodmanClient` attempts to find the Podman service in the following order:
+
 1. `baseUrl` if provided in options.
 2. `connection` name if provided in options (searches `containers.conf` and `podman-connections.json`).
 3. `CONTAINER_HOST` environment variable.
@@ -70,6 +71,7 @@ By default, `PodmanClient` attempts to find the Podman service in the following 
 5. Default local Unix socket path (e.g., `/run/podman/podman.sock` for root or `/run/user/ID/podman/podman.sock` for rootless).
 
 You can also use the shorthand factory:
+
 ```typescript
 import { fromEnv } from "podman-ts";
 const client = fromEnv();
@@ -80,6 +82,7 @@ const client = fromEnv();
 The client provides access to various managers for different resource types:
 
 ### Containers (`client.containers`)
+
 - `list(options?)`: List containers.
 - `get(id)`: Get a container instance.
 - `create(opts)`: Create a new container.
@@ -88,6 +91,7 @@ The client provides access to various managers for different resource types:
 - `prune(filters?)`: Delete stopped containers.
 
 #### Container Instance Methods
+
 - `start()`, `stop()`, `restart()`, `kill(signal?)`
 - `pause()`, `unpause()`
 - `remove(options?)`
@@ -97,6 +101,7 @@ The client provides access to various managers for different resource types:
 - `commit(options?)`: Create an image from the container.
 
 ### Images (`client.images`)
+
 - `list(options?)`: List local images.
 - `get(name)`: Get an image instance.
 - `pull(repo, options?)`: Pull an image from a registry.
@@ -107,13 +112,16 @@ The client provides access to various managers for different resource types:
 - `prune(options?)`: Remove unused images.
 
 #### Image Instance Methods
+
 - `inspect()`, `history()`, `tag(repo, tag?)`, `remove()`
 
 ### Pods (`client.pods`)
+
 - `list()`, `get(id)`, `create(opts)`, `exists(id)`, `remove(id)`, `prune()`
 - Pod instance methods: `start()`, `stop()`, `restart()`, `pause()`, `unpause()`, `inspect()`
 
 ### Other Managers
+
 - `client.networks`: Manage container networks.
 - `client.volumes`: Manage persistent volumes.
 - `client.secrets`: Manage Podman secrets.

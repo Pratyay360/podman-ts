@@ -1,6 +1,6 @@
 /** Base classes for PodmanResource and Manager. */
 
-import { APIClient } from "../api/client";
+import type { APIClient } from "../api/client";
 
 export abstract class PodmanResource {
   /** Raw attributes from the Podman service response. */
@@ -9,7 +9,7 @@ export abstract class PodmanResource {
   manager?: Manager<PodmanResource>;
 
   constructor(
-    attrs: Record<string, unknown> = {},
+    attrs: Record<string, unknown>,
     client: APIClient,
     manager?: Manager<PodmanResource>,
   ) {

@@ -11,20 +11,20 @@
  * ```
  */
 
-import { join } from "path";
+import { join } from "node:path";
+import process from "node:process";
 import { APIClient, APIClientOptions } from "./api/client";
 import { PodmanConfig } from "./domain/config";
 import { ContainersManager } from "./domain/containers";
-import { ImagesManager } from "./domain/images";
-import { NetworksManager } from "./domain/networks";
-import { VolumesManager } from "./domain/volumes";
-import { PodsManager } from "./domain/pods";
-import { SecretsManager } from "./domain/secrets";
-import { ManifestsManager } from "./domain/manifests";
-import { QuadletsManager } from "./domain/quadlets";
 import { EventsManager } from "./domain/events";
+import { ImagesManager } from "./domain/images";
+import { ManifestsManager } from "./domain/manifests";
+import { NetworksManager } from "./domain/networks";
+import { PodsManager } from "./domain/pods";
+import { QuadletsManager } from "./domain/quadlets";
+import { SecretsManager } from "./domain/secrets";
 import { SystemManager } from "./domain/system";
-import process from "node:process";
+import { VolumesManager } from "./domain/volumes";
 
 export interface PodmanClientOptions {
   /** Full URL to Podman service. Defaults to local Unix socket. */

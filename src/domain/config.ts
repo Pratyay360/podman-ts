@@ -3,11 +3,11 @@
  * Uses smol-toml for runtime-agnostic TOML parsing.
  */
 
-import { existsSync, readFileSync } from "fs";
-import { join } from "path";
-import { homedir } from "os";
-import { parse as parseToml } from "smol-toml";
+import { existsSync, readFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import process from "node:process";
+import { parse as parseToml } from "smol-toml";
 
 export interface ServiceConnectionAttrs {
   uri?: string;

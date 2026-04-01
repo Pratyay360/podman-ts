@@ -6,7 +6,7 @@
  * Property 2: compat URL contains version segment exactly once
  */
 
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import fc from "fast-check";
 import { APIClient } from "../api/client";
 

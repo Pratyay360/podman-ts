@@ -1,8 +1,8 @@
-import { prepareFilters, prepareBody } from "../api/utils";
-import { Manager, PodmanResource } from "./manager";
-import { NotFound, APIError, ImageNotFound, ContainerError } from "../errors";
-import { ContainerCreateOptions, renderCreatePayload } from "./containers_create";
+import { prepareBody, prepareFilters } from "../api/utils";
+import { APIError, ContainerError, ImageNotFound, NotFound } from "../errors";
+import { type ContainerCreateOptions, renderCreatePayload } from "./containers_create";
 import type { RunOptions } from "./containers_run";
+import { Manager, PodmanResource } from "./manager";
 
 export interface LogOptions {
   stream?: boolean;
@@ -131,8 +131,8 @@ export class Container extends PodmanResource {
       fetchOpts.unix = (this.client as unknown as { unix?: string }).unix;
     }
     const res = await fetch(url, fetchOpts);
-    if (!res.ok) throw new APIError(`Log stream error`, res.status);
-    const reader = res.body!.getReader();
+    if (!res.ok) throw new APIError("Log stream error", res.status);
+    const reader = res.body?.getReader();
     const decoder = new TextDecoder();
     let buf = "";
     while (true) {
@@ -170,7 +170,7 @@ export class Container extends PodmanResource {
       author?: string;
     } = {},
   ): Promise<Record<string, unknown>> {
-    const res = await this.client.post<Record<string, unknown>>(`/commit`, {
+    const res = await this.client.post<Record<string, unknown>>("/commit", {
       params: {
         container: this.id,
         repo: options.repository,

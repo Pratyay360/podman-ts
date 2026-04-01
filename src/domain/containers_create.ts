@@ -1,9 +1,9 @@
 /** CreateMixin — container creation logic ported from containers_create.py */
 
-import { prepareBody } from "../api/utils";
-import { Container } from "./containers";
-import { ImageNotFound } from "../errors";
 import type { APIClient } from "../api/client";
+import { prepareBody } from "../api/utils";
+import { ImageNotFound } from "../errors";
+import type { Container } from "./containers";
 
 export interface ContainerCreateOptions {
   image: string;
@@ -76,7 +76,7 @@ function toBytes(size: string | number | undefined): number | undefined {
   if (typeof size === "number") return size;
   const match = /^(\d+)([bBkKmMgG]?)$/.exec(size);
   if (!match) throw new TypeError(`Invalid size format: '${size}'`);
-  const n = parseInt(match[1], 10);
+  const n = Number.parseInt(match[1], 10);
   const unit = (match[2] ?? "b").toLowerCase();
   const multipliers: Record<string, number> = { b: 1, k: 1024, m: 1024 ** 2, g: 1024 ** 3 };
   return n * (multipliers[unit] ?? 1);
@@ -99,7 +99,7 @@ export function renderCreatePayload(opts: ContainerCreateOptions): Record<string
     for (const [containerPort, hostPort] of Object.entries(opts.ports)) {
       const [port, proto] = containerPort.split("/");
       portmappings.push({
-        container_port: parseInt(port, 10),
+        container_port: Number.parseInt(port, 10),
         protocol: proto ?? "tcp",
         host_port: hostPort,
       });

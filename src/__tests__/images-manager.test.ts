@@ -5,9 +5,9 @@
  * Requirement 9.6: Unit tests for ImagesManager.list and .get with mocked APIClient
  */
 
-import { describe, test, expect, beforeEach } from "bun:test";
-import { ImagesManager, Image } from "../domain/images";
-import { APIClient } from "../api/client";
+import { beforeEach, describe, expect, test } from "bun:test";
+import type { APIClient } from "../api/client";
+import { Image, ImagesManager } from "../domain/images";
 import { ImageNotFound } from "../errors";
 
 // Mock APIClient for testing
@@ -100,7 +100,7 @@ class MockAPIClient {
     const ver = this.version.replace(/^v/, "");
     const prefix = compatible ? `/v${ver}/compat` : `/v${ver}/libpod`;
     const query = params
-      ? "?" + new URLSearchParams(params as Record<string, string>).toString()
+      ? `?${new URLSearchParams(params as Record<string, string>).toString()}`
       : "";
     return `${this.baseUrl}${prefix}${path}${query}`;
   }

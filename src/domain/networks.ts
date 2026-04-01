@@ -1,6 +1,6 @@
-import { prepareFilters, prepareBody } from "../api/utils";
-import { Manager, PodmanResource } from "./manager";
+import { prepareBody, prepareFilters } from "../api/utils";
 import { NotFound } from "../errors";
+import { Manager, PodmanResource } from "./manager";
 
 export class Network extends PodmanResource {
   get id(): string | undefined {

@@ -5,7 +5,7 @@
  * Property 3: prepareFilters round-trip — every key-value pair is preserved as string arrays
  */
 
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import fc from "fast-check";
 import { prepareFilters } from "../api/utils";
 

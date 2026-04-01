@@ -1,8 +1,8 @@
 import { APIClient } from "../api/client";
 import { prepareFilters } from "../api/utils";
-import { Manager, PodmanResource } from "./manager";
 import { BuildError, ImageNotFound } from "../errors";
 import type { BuildOptions } from "./images_build";
+import { Manager, PodmanResource } from "./manager";
 
 export class Image extends PodmanResource {
   get labels(): Record<string, string> {

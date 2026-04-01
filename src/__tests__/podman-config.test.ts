@@ -8,11 +8,11 @@
  * touching the real user config.
  */
 
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import fc from "fast-check";
-import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from "fs";
-import { join } from "path";
-import { tmpdir } from "os";
 import { PodmanConfig } from "../domain/config";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────

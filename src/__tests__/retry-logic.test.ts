@@ -7,7 +7,7 @@
  * Property 7: HTTP errors are not retried
  */
 
-import { describe, test, expect, mock, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, mock, test } from "bun:test";
 import fc from "fast-check";
 import { APIClient } from "../api/client";
 import { PodmanError } from "../errors";
@@ -143,13 +143,13 @@ describe("Property 6 — exponential backoff formula: min(100 * 2^i, 2000)", () 
   test("property: backoff at attempt index i equals min(100 * 2^i, 2000)", () => {
     fc.assert(
       fc.property(fc.integer({ min: 0, max: 10 }), (i) => {
-        const expected = Math.min(100 * Math.pow(2, i), 2000);
+        const expected = Math.min(100 * 2 ** i, 2000);
         // Verify the formula directly — this is the spec for the delay sequence
         expect(expected).toBeGreaterThanOrEqual(100);
         expect(expected).toBeLessThanOrEqual(2000);
         // Monotonically non-decreasing
         if (i > 0) {
-          const prev = Math.min(100 * Math.pow(2, i - 1), 2000);
+          const prev = Math.min(100 * 2 ** (i - 1), 2000);
           expect(expected).toBeGreaterThanOrEqual(prev);
         }
         return true;
@@ -161,7 +161,7 @@ describe("Property 6 — exponential backoff formula: min(100 * 2^i, 2000)", () 
     // Concrete spot-check of the formula
     const expected = [100, 200, 400, 800, 1600, 2000, 2000];
     for (let i = 0; i < expected.length; i++) {
-      expect(Math.min(100 * Math.pow(2, i), 2000)).toBe(expected[i]);
+      expect(Math.min(100 * 2 ** i, 2000)).toBe(expected[i]);
     }
   });
 
@@ -200,7 +200,7 @@ describe("Property 6 — exponential backoff formula: min(100 * 2^i, 2000)", () 
 
         // Each delay must match min(100 * 2^i, 2000)
         for (let i = 0; i < sleepDelays.length; i++) {
-          const expected = Math.min(100 * Math.pow(2, i), 2000);
+          const expected = Math.min(100 * 2 ** i, 2000);
           if (sleepDelays[i] !== expected) return false;
         }
 

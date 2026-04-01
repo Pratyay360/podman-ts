@@ -7,10 +7,10 @@
  * Property 5: get returns Container with correct id and name extraction
  */
 
-import { describe, test, expect, beforeEach, vi } from "bun:test";
+import { beforeEach, describe, expect, test, vi } from "bun:test";
 import fc from "fast-check";
-import { ContainersManager, Container } from "../domain/containers";
-import { APIClient } from "../api/client";
+import type { APIClient } from "../api/client";
+import { Container, ContainersManager } from "../domain/containers";
 import { NotFound } from "../errors";
 
 // Mock APIClient for testing
@@ -110,7 +110,7 @@ class MockAPIClient {
     const ver = this.version.replace(/^v/, "");
     const prefix = compatible ? `/v${ver}/compat` : `/v${ver}/libpod`;
     const query = params
-      ? "?" + new URLSearchParams(params as Record<string, string>).toString()
+      ? `?${new URLSearchParams(params as Record<string, string>).toString()}`
       : "";
     return `${this.baseUrl}${prefix}${path}${query}`;
   }

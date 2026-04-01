@@ -1,33 +1,29 @@
 {
   "name": "podman-ts",
   "version": "5.8.0",
-  "description": "TypeScript bindings and CLI tools for the Podman RESTful API",
+  "description": "TypeScript bindings for the Podman RESTful API (libpod)",
   "keywords": [
     "containers",
     "docker",
     "libpod",
     "podman",
-    "typescript"
+    "typescript",
+    "bun"
   ],
   "homepage": "https://github.com/containers/podman-ts#readme",
   "bugs": {
     "url": "https://github.com/containers/podman-ts/issues"
   },
+  "license": "Apache-2.0",
+  "author": "pmustafi",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/containers/podman-ts.git"
   },
-  "license": "Apache-2.0",
-  "files": [
-    "dist"
-  ],
   "type": "module",
-  "bin": {
-    "podman-ts": "dist/index.cjs"
-  },
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": {
@@ -40,8 +36,17 @@
       }
     }
   },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts --target es2022 --out-dir dist",
+    "prepare": "bun run build",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "lint": "biome check src/",
@@ -57,7 +62,6 @@
     "tsup": "^8.0.0",
     "typescript": "^5.4.0"
   },
-  "author": "pmustafi",
   "engines": {
     "bun": ">=1.0",
     "node": ">=18"

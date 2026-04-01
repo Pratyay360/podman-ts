@@ -1,6 +1,6 @@
 import { prepareFilters } from "../api/utils";
-import { Manager, PodmanResource } from "./manager";
 import { NotFound, PodmanError } from "../errors";
+import { Manager, PodmanResource } from "./manager";
 
 /** A quadlet file item: a [filename, content] tuple, a file path string, or a URL/path object. */
 export type QuadletFileItem = [string, string | Uint8Array] | string;
