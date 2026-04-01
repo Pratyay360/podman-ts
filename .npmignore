@@ -1,0 +1,38 @@
+# Source and Tests
+src/
+**/__tests__/**
+
+# Bun and Node
+node_modules/
+bun.lock
+bun.lockb
+.bun-test
+
+# IDE and OS
+.vscode/
+.idea/
+.DS_Store
+*.log
+.git/
+
+# Project configuration
+Makefile
+MANIFEST.in
+Dockerfile
+gating.yml
+mkdocs.yml
+pyproject.toml
+setup.cfg
+setup.py
+tox.ini
+rpm/
+plans/
+contrib/
+docs/
+podman/
+podman-client-ts/
+podman.svg
+OWNERS
+CODE-OF-CONDUCT.md
+SECURITY.md
+CONTRIBUTING.md

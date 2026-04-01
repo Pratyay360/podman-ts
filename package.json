@@ -1,17 +1,30 @@
 {
   "name": "podman-ts",
-  "version": "1.0.0",
+  "version": "5.8.0",
   "description": "TypeScript bindings and CLI tools for the Podman RESTful API",
-  "license": "Apache-2.0",
-  "author": "pmustafi",
-  "workspaces": [
-    "podman-client-ts"
+  "keywords": [
+    "containers",
+    "docker",
+    "libpod",
+    "podman",
+    "typescript"
   ],
+  "homepage": "https://github.com/containers/podman-ts#readme",
+  "bugs": {
+    "url": "https://github.com/containers/podman-ts/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/containers/podman-ts.git"
+  },
+  "license": "Apache-2.0",
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "type": "module",
+  "bin": {
+    "podman-ts": "dist/index.cjs"
+  },
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -28,23 +41,25 @@
     }
   },
   "scripts": {
-    "start": "bun run src/index.ts",
     "build": "tsup src/index.ts --format esm,cjs --dts --target es2022 --out-dir dist",
-    "test": "bun test --cwd podman-client-ts",
-    "lint": "bun run --cwd podman-client-ts lint",
-    "format": "bun run --cwd podman-client-ts format"
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "lint": "biome check src/",
+    "format": "biome format --write src/"
   },
   "dependencies": {
-    "podman-client": "workspace:*"
+    "smol-toml": "^1.3.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.8.0",
     "@types/bun": "latest",
-    "oxfmt": "^0.43.0",
-    "oxlint": "^1.58.0",
+    "fast-check": "^3.19.0",
     "tsup": "^8.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.4.0"
   },
-  "peerDependencies": {
-    "typescript": "^6.0.2"
+  "author": "pmustafi",
+  "engines": {
+    "bun": ">=1.0",
+    "node": ">=18"
   }
 }
