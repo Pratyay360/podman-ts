@@ -133,6 +133,7 @@ export class Container extends PodmanResource {
     const res = await fetch(url, fetchOpts);
     if (!res.ok) throw new APIError("Log stream error", res.status);
     const reader = res.body?.getReader();
+    if (!reader) throw new Error("Failed to get reader from response body");
     const decoder = new TextDecoder();
     let buf = "";
     while (true) {

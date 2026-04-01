@@ -2,14 +2,7 @@
   "name": "podman-ts",
   "version": "5.8.0",
   "description": "TypeScript bindings for the Podman RESTful API (libpod)",
-  "keywords": [
-    "containers",
-    "docker",
-    "libpod",
-    "podman",
-    "typescript",
-    "bun"
-  ],
+  "keywords": ["containers", "docker", "libpod", "podman", "typescript", "bun"],
   "homepage": "https://github.com/containers/podman-ts#readme",
   "bugs": {
     "url": "https://github.com/containers/podman-ts/issues"
@@ -36,9 +29,7 @@
       }
     }
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "sideEffects": false,
   "publishConfig": {
     "access": "public",
@@ -49,14 +40,13 @@
     "prepare": "bun run build",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
-    "lint": "biome check src/",
-    "format": "biome format --write src/"
+    "lint": "npx oxlint@latest",
+    "format": "npx oxfmt@latest --write src/"
   },
   "dependencies": {
     "smol-toml": "^1.3.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.8.0",
     "@types/bun": "latest",
     "fast-check": "^3.19.0",
     "tsup": "^8.0.0",
