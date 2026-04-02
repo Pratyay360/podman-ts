@@ -1,5 +1,5 @@
 {
-  "name": "podman-ts",
+  "name": "@pratyay360/podman-ts",
   "version": "5.8.0",
   "exports": "./src/index.ts",
   "publish": {
