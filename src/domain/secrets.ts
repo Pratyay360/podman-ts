@@ -1,5 +1,4 @@
 import type { Buffer } from "node:buffer";
-import { prepareBody } from "../api/utils";
 import { NotFound } from "../errors";
 import { Manager, PodmanResource } from "./manager";
 

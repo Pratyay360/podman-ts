@@ -1,4 +1,3 @@
-import { APIClient } from "../api/client";
 import { prepareFilters } from "../api/utils";
 import { BuildError, ImageNotFound } from "../errors";
 import type { BuildOptions } from "./images_build";

@@ -1,7 +1,7 @@
 /** BuildMixin — image build() logic ported from images_build.py */
 
 import type { APIClient } from "../api/client";
-import { BuildError, ImageNotFound, PodmanError } from "../errors";
+import { BuildError, ImageNotFound } from "../errors";
 import type { Image } from "./images";
 
 export interface BuildOptions {

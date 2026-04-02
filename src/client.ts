@@ -13,7 +13,7 @@
 
 import { join } from "node:path";
 import process from "node:process";
-import { APIClient, APIClientOptions } from "./api/client";
+import { APIClient } from "./api/client";
 import { PodmanConfig } from "./domain/config";
 import { ContainersManager } from "./domain/containers";
 import { EventsManager } from "./domain/events";

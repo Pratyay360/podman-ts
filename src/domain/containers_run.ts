@@ -77,7 +77,7 @@ export class RunMixin {
     if (remove) await container.remove();
 
     if (exitCode !== 0) {
-      const logs = await container.logs({ stdout: false, stderr: true });
+      const _logs = await container.logs({ stdout: false, stderr: true });
       throw new ContainerError(`Container exited with status ${exitCode}`, exitCode);
     }
 

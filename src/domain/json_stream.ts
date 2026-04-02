@@ -19,7 +19,7 @@ export async function* jsonStream(
         if (result === null) break;
         yield result.value;
         buffer = buffer.slice(result.consumed).trimStart();
-      } catch (e) {
+      } catch {
         break;
       }
     }
