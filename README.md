@@ -1,6 +1,8 @@
 # podman-ts
 
-TypeScript bindings for the Podman RESTful API (libpod). This library provides a high-level, type-safe interface for managing containers, images, pods, networks, and more, using Podman's REST API.
+TypeScript/Bun bindings for the Podman RESTful API (libpod). This library provides a high-level, type-safe interface for managing containers, images, pods, networks, quadlets, and more, using Podman's REST API.
+
+> Note: Due to its utilization of high-performance Bun-native APIs (such as `Bun.spawn` and `Bun.file`), this library currently requires the [Bun](https://bun.sh) runtime.
 
 ## Installation
 
@@ -119,6 +121,19 @@ The client provides access to various managers for different resource types:
 
 - `list()`, `get(id)`, `create(opts)`, `exists(id)`, `remove(id)`, `prune()`
 - Pod instance methods: `start()`, `stop()`, `restart()`, `pause()`, `unpause()`, `inspect()`
+
+### Quadlets (`client.quadlets`)
+
+- `list(options?)`: List systemd quadlets.
+- `get(name)`: Get a quadlet instance.
+- `install(files, options?)`: Install one or more quadlet files.
+- `getContents(name)`: Read the raw systemd unit file contents.
+- `delete(name?, options?)`: Delete quadlets (pass `all: true` to delete all).
+- `exists(name)`: Check if a quadlet exists.
+
+#### Quadlet Instance Methods
+
+- `getContents()`, `delete(options?)`
 
 ### Other Managers
 
