@@ -1,9 +1,9 @@
 /** CreateMixin — container creation logic ported from containers_create.py */
 
-import type { APIClient } from "../api/client";
-import { prepareBody } from "../api/utils";
-import { ImageNotFound } from "../errors";
-import type { Container } from "./containers";
+import type { APIClient } from "../api/client.ts";
+import { prepareBody } from "../api/utils.ts";
+import { ImageNotFound } from "../errors.ts";
+import type { Container } from "../containers";
 
 export interface ContainerCreateOptions {
   image: string;
@@ -78,7 +78,12 @@ function toBytes(size: string | number | undefined): number | undefined {
   if (!match) throw new TypeError(`Invalid size format: '${size}'`);
   const n = Number.parseInt(match[1], 10);
   const unit = (match[2] ?? "b").toLowerCase();
-  const multipliers: Record<string, number> = { b: 1, k: 1024, m: 1024 ** 2, g: 1024 ** 3 };
+  const multipliers: Record<string, number> = {
+    b: 1,
+    k: 1024,
+    m: 1024 ** 2,
+    g: 1024 ** 3,
+  };
   return n * (multipliers[unit] ?? 1);
 }
 

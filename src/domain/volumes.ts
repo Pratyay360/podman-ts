@@ -1,6 +1,6 @@
-import { prepareBody, prepareFilters } from "../api/utils";
-import { NotFound } from "../errors";
-import { Manager, PodmanResource } from "./manager";
+import { prepareBody, prepareFilters } from "../api/utils.ts";
+import { NotFound } from "../errors.ts";
+import { Manager, PodmanResource } from "./manager.ts";
 
 export class Volume extends PodmanResource {
   get id(): string | undefined {

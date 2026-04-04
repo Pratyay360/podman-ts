@@ -1,6 +1,6 @@
-import { prepareFilters } from "../api/utils";
-import { NotFound } from "../errors";
-import { Manager, PodmanResource } from "./manager";
+import { prepareFilters } from "../api/utils.ts";
+import { NotFound } from "../errors.ts";
+import { Manager, PodmanResource } from "./manager.ts";
 
 export class Pod extends PodmanResource {
   get id(): string | undefined {

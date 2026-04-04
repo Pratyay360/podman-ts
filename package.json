@@ -1,5 +1,5 @@
 {
-  "name": "@Pratyay360/podman-ts",
+  "name": "@pratyay360/podman-ts",
   "version": "1.0.0",
   "private": false,
   "description": "TypeScript bindings for the Podman RESTful API (libpod)",

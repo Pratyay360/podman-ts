@@ -1,5 +1,5 @@
-import type { APIClient } from "../api/client";
-import { prepareBody } from "../api/utils";
+import type { APIClient } from "../api/client.ts";
+import { prepareBody } from "../api/utils.ts";
 
 export interface LoginOptions {
   password?: string;

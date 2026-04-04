@@ -1,6 +1,6 @@
 import type { Buffer } from "node:buffer";
-import { NotFound } from "../errors";
-import { Manager, PodmanResource } from "./manager";
+import { NotFound } from "../errors.ts";
+import { Manager, PodmanResource } from "./manager.ts";
 
 export class Secret extends PodmanResource {
   get id(): string | undefined {

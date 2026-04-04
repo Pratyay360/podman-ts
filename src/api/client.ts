@@ -3,7 +3,7 @@
  * Uses Bun's native fetch with Unix-socket support (no axios / node:http needed).
  */
 
-import { APIError, NotFound, PodmanError } from "../errors";
+import { APIError, NotFound, PodmanError } from "../errors.ts";
 
 export interface APIClientOptions {
   /** Full URL to Podman service, e.g. "http+unix:///run/podman/podman.sock" */

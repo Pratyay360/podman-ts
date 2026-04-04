@@ -1,6 +1,6 @@
 /** JSON stream parsing utilities. */
 
-import { StreamParseError } from "../errors";
+import { StreamParseError } from "../errors.ts";
 
 /** Yield decoded JSON objects from an async iterable of text chunks. */
 export async function* jsonStream(

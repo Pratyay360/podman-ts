@@ -13,18 +13,18 @@
 
 import { join } from "node:path";
 import process from "node:process";
-import { APIClient } from "./api/client";
-import { PodmanConfig } from "./domain/config";
-import { ContainersManager } from "./domain/containers";
-import { EventsManager } from "./domain/events";
-import { ImagesManager } from "./domain/images";
-import { ManifestsManager } from "./domain/manifests";
-import { NetworksManager } from "./domain/networks";
-import { PodsManager } from "./domain/pods";
-import { QuadletsManager } from "./domain/quadlets";
-import { SecretsManager } from "./domain/secrets";
-import { SystemManager } from "./domain/system";
-import { VolumesManager } from "./domain/volumes";
+import { APIClient } from "./api/client.ts";
+import { PodmanConfig } from "./domain/config.ts";
+import { ContainersManager } from "./domain/containers.ts";
+import { EventsManager } from "./domain/events.ts";
+import { ImagesManager } from "./domain/images.ts";
+import { ManifestsManager } from "./domain/manifests.ts";
+import { NetworksManager } from "./domain/networks.ts";
+import { PodsManager } from "./domain/pods.ts";
+import { QuadletsManager } from "./domain/quadlets.ts";
+import { SecretsManager } from "./domain/secrets.ts";
+import { SystemManager } from "./domain/system.ts";
+import { VolumesManager } from "./domain/volumes.ts";
 
 export interface PodmanClientOptions {
   /** Full URL to Podman service. Defaults to local Unix socket. */
@@ -82,7 +82,11 @@ export class PodmanClient {
       }
     }
 
-    this.api = new APIClient({ baseUrl, version: options.version, timeout: options.timeout });
+    this.api = new APIClient({
+      baseUrl,
+      version: options.version,
+      timeout: options.timeout,
+    });
   }
 
   /** Create a PodmanClient from environment variables (CONTAINER_HOST or DOCKER_HOST). */
@@ -132,21 +136,21 @@ export class PodmanClient {
     return (this._system ??= new SystemManager(this.api));
   }
 
-  async ping(): Promise<boolean> {
+  get ping(): Promise<boolean> {
     return this.system.ping();
   }
-  async version(): Promise<Record<string, unknown>> {
+  get version(): Promise<Record<string, unknown>> {
     return this.system.version();
   }
-  async info(): Promise<Record<string, unknown>> {
+  get info(): Promise<Record<string, unknown>> {
     return this.system.info();
   }
-  async df(): Promise<Record<string, unknown>> {
+  get df(): Promise<Record<string, unknown>> {
     return this.system.df();
   }
 
   close(): void {
-    /* no-op — Bun fetch has no persistent pool to drain */
+    // no-op — Bun fetch has no persistent pool to drain implement later
   }
 
   [Symbol.dispose](): void {

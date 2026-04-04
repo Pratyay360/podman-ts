@@ -18,17 +18,21 @@ describe("APIClient", () => {
   });
 
   test("constructor throws on ssh baseUrl", () => {
-    expect(() => new APIClient({ baseUrl: "ssh://remote" })).toThrow("SSH connections require an SSH tunnel");
+    expect(() => new APIClient({ baseUrl: "ssh://remote" })).toThrow(
+      "SSH connections require an SSH tunnel",
+    );
   });
 
   test("buildUrl constructs correct paths", () => {
     const client = new APIClient({ baseUrl: "http://localhost:8080", version: "v5.0.0" });
-    
-    expect(client.buildUrlPublic("/containers/json", false, { all: true }))
-      .toBe("http://localhost:8080/v5.0.0/libpod/containers/json?all=true");
-    
-    expect(client.buildUrlPublic("/images/json", true))
-      .toBe("http://localhost:8080/v5.0.0/compat/images/json");
+
+    expect(client.buildUrlPublic("/containers/json", false, { all: true })).toBe(
+      "http://localhost:8080/v5.0.0/libpod/containers/json?all=true",
+    );
+
+    expect(client.buildUrlPublic("/images/json", true)).toBe(
+      "http://localhost:8080/v5.0.0/compat/images/json",
+    );
   });
 });
 
@@ -74,13 +78,13 @@ describe("APIResponse", () => {
     });
 
     test("handles non-object body", () => {
-        const res = new APIResponse(400, "Bad Request");
-        expect(() => res.raiseForStatus()).toThrow(APIError);
-        try {
-            res.raiseForStatus();
-        } catch (e: any) {
-            expect(e.message).toBe("Bad Request");
-        }
+      const res = new APIResponse(400, "Bad Request");
+      expect(() => res.raiseForStatus()).toThrow(APIError);
+      try {
+        res.raiseForStatus();
+      } catch (e: any) {
+        expect(e.message).toBe("Bad Request");
+      }
     });
   });
 });

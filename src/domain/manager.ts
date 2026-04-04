@@ -1,6 +1,6 @@
 /** Base classes for PodmanResource and Manager. */
 
-import type { APIClient } from "../api/client";
+import type { APIClient } from "../api/client.ts";
 
 export abstract class PodmanResource {
   /** Raw attributes from the Podman service response. */

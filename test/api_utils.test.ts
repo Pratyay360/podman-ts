@@ -159,56 +159,62 @@ describe("api/utils", () => {
       // type 2 (stderr), length 5, payload "world"
       const hello = new TextEncoder().encode("hello");
       const world = new TextEncoder().encode("world");
-      
+
       const data = new Uint8Array(8 + 5 + 8 + 5);
-      
+
       // stdout header
       data[0] = 1;
       data[7] = 5;
       data.set(hello, 8);
-      
+
       // stderr header
       data[8 + 5] = 2;
       data[8 + 5 + 7] = 5;
       data.set(world, 8 + 5 + 8);
-      
+
       const { stdout, stderr } = demuxOutput(data);
       expect(new TextDecoder().decode(stdout)).toBe("hello");
       expect(new TextDecoder().decode(stderr)).toBe("world");
     });
 
     test("handles fragmented or multiple chunks of same stream", () => {
-        const hello = new TextEncoder().encode("hello");
-        const space = new TextEncoder().encode(" ");
-        const world = new TextEncoder().encode("world");
-        
-        const data = new Uint8Array((8 + 5) + (8 + 1) + (8 + 5));
-        
-        // stdout "hello"
-        data[0] = 1; data[7] = 5; data.set(hello, 8);
-        // stdout " "
-        let off = 8 + 5;
-        data[off] = 1; data[off + 7] = 1; data.set(space, off + 8);
-        // stdout "world"
-        off += 8 + 1;
-        data[off] = 1; data[off + 7] = 5; data.set(world, off + 8);
-        
-        const { stdout } = demuxOutput(data);
-        expect(new TextDecoder().decode(stdout)).toBe("hello world");
+      const hello = new TextEncoder().encode("hello");
+      const space = new TextEncoder().encode(" ");
+      const world = new TextEncoder().encode("world");
+
+      const data = new Uint8Array(8 + 5 + (8 + 1) + (8 + 5));
+
+      // stdout "hello"
+      data[0] = 1;
+      data[7] = 5;
+      data.set(hello, 8);
+      // stdout " "
+      let off = 8 + 5;
+      data[off] = 1;
+      data[off + 7] = 1;
+      data.set(space, off + 8);
+      // stdout "world"
+      off += 8 + 1;
+      data[off] = 1;
+      data[off + 7] = 5;
+      data.set(world, off + 8);
+
+      const { stdout } = demuxOutput(data);
+      expect(new TextDecoder().decode(stdout)).toBe("hello world");
     });
 
     test("stops on incomplete header", () => {
-        const data = new Uint8Array([1, 0, 0, 0, 0, 0, 0]); // only 7 bytes
-        const { stdout, stderr } = demuxOutput(data);
-        expect(stdout.length).toBe(0);
-        expect(stderr.length).toBe(0);
+      const data = new Uint8Array([1, 0, 0, 0, 0, 0, 0]); // only 7 bytes
+      const { stdout, stderr } = demuxOutput(data);
+      expect(stdout.length).toBe(0);
+      expect(stderr.length).toBe(0);
     });
 
     test("stops on incomplete payload", () => {
-        const data = new Uint8Array([1, 0, 0, 0, 0, 0, 0, 10, 1, 2, 3]); // header says 10 bytes, only 3 provided
-        const { stdout, stderr } = demuxOutput(data);
-        expect(stdout.length).toBe(0);
-        expect(stderr.length).toBe(0);
+      const data = new Uint8Array([1, 0, 0, 0, 0, 0, 0, 10, 1, 2, 3]); // header says 10 bytes, only 3 provided
+      const { stdout, stderr } = demuxOutput(data);
+      expect(stdout.length).toBe(0);
+      expect(stderr.length).toBe(0);
     });
   });
 });
