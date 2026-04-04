@@ -1,7 +1,7 @@
-import { encodeAuthHeader, prepareBody } from "../api/utils.ts";
-import { ImageNotFound, NotFound } from "../errors.ts";
-import { Image } from "./images.ts";
-import { Manager, PodmanResource } from "./manager.ts";
+import { encodeAuthHeader, prepareBody } from "../api/utils";
+import { ImageNotFound, NotFound } from "../errors";
+import { Image } from "./images";
+import { Manager, PodmanResource } from "./manager";
 
 export class Manifest extends PodmanResource {
   get id(): string | undefined {
@@ -90,7 +90,7 @@ export class Manifest extends PodmanResource {
 }
 
 export class ManifestsManager extends Manager<Manifest> {
-  protected resourceClass() {
+  protected resourceClass(): typeof Manifest {
     return Manifest;
   }
 

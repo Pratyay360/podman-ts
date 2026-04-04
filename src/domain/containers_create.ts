@@ -1,9 +1,9 @@
 /** CreateMixin — container creation logic ported from containers_create.py */
 
-import type { APIClient } from "../api/client.ts";
-import { prepareBody } from "../api/utils.ts";
-import { ImageNotFound } from "../errors.ts";
-import type { Container } from "../containers";
+import type { APIClient } from "../api/client";
+import { prepareBody } from "../api/utils";
+import { ImageNotFound } from "../errors";
+import type { Container } from "./containers";
 
 export interface ContainerCreateOptions {
   image: string;

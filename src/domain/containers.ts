@@ -1,8 +1,8 @@
-import { prepareBody, prepareFilters } from "../api/utils.ts";
-import { APIError, ContainerError, ImageNotFound, NotFound } from "../errors.ts";
-import { type ContainerCreateOptions, renderCreatePayload } from "./containers_create.ts";
-import type { RunOptions } from "./containers_run.ts";
-import { Manager, PodmanResource } from "./manager.ts";
+import { prepareBody, prepareFilters } from "../api/utils";
+import { APIError, ContainerError, ImageNotFound, NotFound } from "../errors";
+import { type ContainerCreateOptions, renderCreatePayload } from "./containers_create";
+import type { RunOptions } from "./containers_run";
+import { Manager, PodmanResource } from "./manager";
 
 export interface LogOptions {
   stream?: boolean;
@@ -202,7 +202,7 @@ export interface ContainerListOptions {
 }
 
 export class ContainersManager extends Manager<Container> {
-  protected resourceClass() {
+  protected resourceClass(): typeof Container {
     return Container;
   }
 

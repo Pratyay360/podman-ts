@@ -1,6 +1,6 @@
-import { prepareFilters } from "../api/utils.ts";
-import { NotFound, PodmanError } from "../errors.ts";
-import { Manager, PodmanResource } from "./manager.ts";
+import { prepareFilters } from "../api/utils";
+import { NotFound, PodmanError } from "../errors";
+import { Manager, PodmanResource } from "./manager";
 
 /** A quadlet file item: a [filename, content] tuple, a file path string, or a URL/path object. */
 export type QuadletFileItem = [string, string | Uint8Array] | string;
@@ -44,7 +44,7 @@ export interface QuadletDeleteOptions {
 }
 
 export class QuadletsManager extends Manager<Quadlet> {
-  protected resourceClass() {
+  protected resourceClass(): typeof Quadlet {
     return Quadlet;
   }
 

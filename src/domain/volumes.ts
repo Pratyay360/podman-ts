@@ -1,6 +1,6 @@
-import { prepareBody, prepareFilters } from "../api/utils.ts";
-import { NotFound } from "../errors.ts";
-import { Manager, PodmanResource } from "./manager.ts";
+import { prepareBody, prepareFilters } from "../api/utils";
+import { NotFound } from "../errors";
+import { Manager, PodmanResource } from "./manager";
 
 export class Volume extends PodmanResource {
   get id(): string | undefined {
@@ -42,7 +42,7 @@ export interface VolumeListOptions {
 }
 
 export class VolumesManager extends Manager<Volume> {
-  protected resourceClass() {
+  protected resourceClass(): typeof Volume {
     return Volume;
   }
 

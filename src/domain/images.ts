@@ -1,7 +1,7 @@
-import { prepareFilters } from "../api/utils.ts";
-import { BuildError, ImageNotFound } from "../errors.ts";
-import type { BuildOptions } from "./images_build.ts";
-import { Manager, PodmanResource } from "./manager.ts";
+import { prepareFilters } from "../api/utils";
+import { BuildError, ImageNotFound } from "../errors";
+import type { BuildOptions } from "./images_build";
+import { Manager, PodmanResource } from "./manager";
 
 export class Image extends PodmanResource {
   get labels(): Record<string, string> {
@@ -73,7 +73,7 @@ export interface ImageSearchOptions {
 }
 
 export class ImagesManager extends Manager<Image> {
-  protected resourceClass() {
+  protected resourceClass(): typeof Image {
     return Image;
   }
 

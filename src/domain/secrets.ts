@@ -1,6 +1,6 @@
 import type { Buffer } from "node:buffer";
-import { NotFound } from "../errors.ts";
-import { Manager, PodmanResource } from "./manager.ts";
+import { NotFound } from "../errors";
+import { Manager, PodmanResource } from "./manager";
 
 export class Secret extends PodmanResource {
   get id(): string | undefined {
@@ -29,7 +29,7 @@ export interface SecretCreateOptions {
 }
 
 export class SecretsManager extends Manager<Secret> {
-  protected resourceClass() {
+  protected resourceClass(): typeof Secret {
     return Secret;
   }
 

@@ -3,8 +3,8 @@
 export const VERSION = "5.8.0";
 
 // ── Client ────────────────────────────────────────────────────────────────────
-export { PodmanClient, DockerClient, fromEnv } from "./client.ts";
-export type { PodmanClientOptions } from "./client.ts";
+export { PodmanClient, DockerClient, fromEnv } from "./client";
+export type { PodmanClientOptions } from "./client";
 
 // ── Errors ────────────────────────────────────────────────────────────────────
 export {
@@ -16,11 +16,11 @@ export {
   ContainerError,
   InvalidArgument,
   StreamParseError,
-} from "./errors.ts";
+} from "./errors";
 
 // ── Low-level API client ──────────────────────────────────────────────────────
-export { APIClient, APIResponse } from "./api/client.ts";
-export type { APIClientOptions, RequestConfig } from "./api/client.ts";
+export { APIClient, APIResponse } from "./api/client";
+export type { APIClientOptions, RequestConfig } from "./api/client";
 
 // ── API utilities ─────────────────────────────────────────────────────────────
 export {
@@ -30,73 +30,73 @@ export {
   parseRepository,
   prepareTimestamp,
   demuxOutput,
-} from "./api/utils.ts";
+} from "./api/utils";
 
-export { VERSION as API_VERSION, COMPATIBLE_VERSION, DEFAULT_CHUNK_SIZE } from "./api/versions.ts";
+export { VERSION as API_VERSION, COMPATIBLE_VERSION, DEFAULT_CHUNK_SIZE } from "./api/versions";
 
 // ── Domain: Containers ────────────────────────────────────────────────────────
-export { Container, ContainersManager } from "./domain/containers.ts";
+export { Container, ContainersManager } from "./domain/containers";
 export type {
   ContainerListOptions,
   ContainerCreateOptions,
   RunOptions,
   LogOptions,
-} from "./domain/containers.ts";
+} from "./domain/containers";
 
 // ── Domain: Images ────────────────────────────────────────────────────────────
-export { Image, ImagesManager } from "./domain/images.ts";
+export { Image, ImagesManager } from "./domain/images";
 export type {
   ImageListOptions,
   ImagePullOptions,
   ImagePushOptions,
   ImageSearchOptions,
   BuildOptions,
-} from "./domain/images.ts";
+} from "./domain/images";
 
 // ── Domain: Networks ─────────────────────────────────────────────────────────
-export { Network, NetworksManager } from "./domain/networks.ts";
-export type { NetworkCreateOptions, NetworkListOptions } from "./domain/networks.ts";
+export { Network, NetworksManager } from "./domain/networks";
+export type { NetworkCreateOptions, NetworkListOptions } from "./domain/networks";
 
 // ── Domain: Volumes ───────────────────────────────────────────────────────────
-export { Volume, VolumesManager } from "./domain/volumes.ts";
-export type { VolumeCreateOptions, VolumeListOptions } from "./domain/volumes.ts";
+export { Volume, VolumesManager } from "./domain/volumes";
+export type { VolumeCreateOptions, VolumeListOptions } from "./domain/volumes";
 
 // ── Domain: Pods ──────────────────────────────────────────────────────────────
-export { Pod, PodsManager } from "./domain/pods.ts";
-export type { PodListOptions } from "./domain/pods.ts";
+export { Pod, PodsManager } from "./domain/pods";
+export type { PodListOptions } from "./domain/pods";
 
 // ── Domain: Secrets ───────────────────────────────────────────────────────────
-export { Secret, SecretsManager } from "./domain/secrets.ts";
-export type { SecretCreateOptions } from "./domain/secrets.ts";
+export { Secret, SecretsManager } from "./domain/secrets";
+export type { SecretCreateOptions } from "./domain/secrets";
 
 // ── Domain: Manifests ─────────────────────────────────────────────────────────
-export { Manifest, ManifestsManager } from "./domain/manifests.ts";
+export { Manifest, ManifestsManager } from "./domain/manifests";
 
 // ── Domain: Quadlets ──────────────────────────────────────────────────────────
-export { Quadlet, QuadletsManager } from "./domain/quadlets.ts";
-export type { QuadletFileItem, QuadletDeleteOptions } from "./domain/quadlets.ts";
+export { Quadlet, QuadletsManager } from "./domain/quadlets";
+export type { QuadletFileItem, QuadletDeleteOptions } from "./domain/quadlets";
 
 // ── Domain: Events ────────────────────────────────────────────────────────────
-export { EventsManager } from "./domain/events.ts";
-export type { EventsListOptions } from "./domain/events.ts";
+export { EventsManager } from "./domain/events";
+export type { EventsListOptions } from "./domain/events";
 
 // ── Domain: System ────────────────────────────────────────────────────────────
-export { SystemManager } from "./domain/system.ts";
-export type { LoginOptions } from "./domain/system.ts";
+export { SystemManager } from "./domain/system";
+export type { LoginOptions } from "./domain/system";
 
 // ── Domain: Config ────────────────────────────────────────────────────────────
-export { PodmanConfig, ServiceConnection } from "./domain/config.ts";
-export type { ServiceConnectionAttrs } from "./domain/config.ts";
+export { PodmanConfig, ServiceConnection } from "./domain/config";
+export type { ServiceConnectionAttrs } from "./domain/config";
 
 // ── Domain: IPAM ─────────────────────────────────────────────────────────────
-export { IPAMPool, IPAMConfig } from "./domain/ipam.ts";
-export type { IPAMPoolOptions, IPAMConfigOptions } from "./domain/ipam.ts";
+export { IPAMPool, IPAMConfig } from "./domain/ipam";
+export type { IPAMPoolOptions, IPAMConfigOptions } from "./domain/ipam";
 
 // ── Domain: Registry data ─────────────────────────────────────────────────────
-export { RegistryData } from "./domain/registry_data.ts";
+export { RegistryData } from "./domain/registry_data";
 
 // ── Domain: JSON stream ───────────────────────────────────────────────────────
-export { jsonStream, lineStream } from "./domain/json_stream.ts";
+export { jsonStream, lineStream } from "./domain/json_stream";
 
 // ── Base classes ──────────────────────────────────────────────────────────────
-export { PodmanResource, Manager } from "./domain/manager.ts";
+export { PodmanResource, Manager } from "./domain/manager";
