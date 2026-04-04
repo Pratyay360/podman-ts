@@ -6,13 +6,12 @@ name: Node.js Package
 on:
   release:
   workflow_dispatch:
-    
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@main
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -27,7 +26,7 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@main
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:

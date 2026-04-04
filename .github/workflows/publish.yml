@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@main
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -47,12 +47,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@main
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Setup Deno
+        uses: deno-community/setup-deno@v2
         with:
-          bun-version: latest
+          deno-version: latest
 
       - name: Publish to JSR
-        run: bunx jsr publish
+        run: deno install && deno publish --access public
