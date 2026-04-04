@@ -2,5 +2,5 @@
   "name": "@pratyay360/podman-ts",
   "version": "1.0.0",
   "license": "Apache-2.0",
-  "exports": "./mod.ts"
+  "exports": "./src/index.ts"
 }
