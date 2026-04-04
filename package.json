@@ -1,7 +1,7 @@
 {
-  "name": "podman-ts",
+  "name": "@Pratyay360/podman-ts",
   "version": "5.8.0",
-  "private": true,
+  "private": false,
   "description": "TypeScript bindings for the Podman RESTful API (libpod)",
   "keywords": [
     "bun",
@@ -11,15 +11,15 @@
     "podman",
     "typescript"
   ],
-  "homepage": "https://github.com/pratyay360/podman-ts#readme",
+  "homepage": "https://github.com/Pratyay360/podman-ts#readme",
   "bugs": {
-    "url": "https://github.com/pratyay360/podman-ts/issues"
+    "url": "https://github.com/Pratyay360/podman-ts/issues"
   },
   "license": "Apache-2.0",
   "author": "pratyay360",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pratyay360/podman-ts.git"
+    "url": "git+https://github.com/Pratyay360/podman-ts.git"
   },
   "files": [
     "dist"
