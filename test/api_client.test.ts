@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { APIClient, APIResponse } from "../src/api/client";
+import { APIClient, APIResponse, attachRequestBody } from "../src/api/client";
 import { NotFound, APIError } from "../src/errors";
 
 describe("APIClient", () => {
@@ -33,6 +33,22 @@ describe("APIClient", () => {
     expect(client.buildUrlPublic("/images/json", true)).toBe(
       "http://localhost:8080/v5.0.0/compat/images/json",
     );
+
+    expect(
+      client.buildUrlPublic("/containers/stats", false, {
+        containers: ["c1", "c2"],
+        stream: false,
+      }),
+    ).toBe(
+      "http://localhost:8080/v5.0.0/libpod/containers/stats?containers=c1&containers=c2&stream=false",
+    );
+  });
+
+  test("attachRequestBody passes binary through without JSON encoding", () => {
+    const headers: Record<string, string> = { "Content-Type": "application/x-tar" };
+    const buf = new Uint8Array([1, 2, 3]);
+    const body = attachRequestBody(headers, buf);
+    expect(body).toBeInstanceOf(Uint8Array);
   });
 });
 

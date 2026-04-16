@@ -1,7 +1,8 @@
 import { prepareBody, prepareFilters } from "../api/utils";
-import { APIError, ContainerError, ImageNotFound, NotFound } from "../errors";
+import { APIError, ContainerError, ImageNotFound, NotFound, PodmanError } from "../errors";
 import { type ContainerCreateOptions, renderCreatePayload } from "./containers_create";
 import type { RunOptions } from "./containers_run";
+import { ExecInstance } from "./exec";
 import { Manager, PodmanResource } from "./manager";
 
 export interface LogOptions {
@@ -77,17 +78,42 @@ export class Container extends PodmanResource {
     res.raiseForStatus();
   }
 
-  async wait(options: { condition?: string } = {}): Promise<number> {
-    const res = await this.client.post<{ StatusCode: number }>(`/containers/${this.id}/wait`, {
-      params: { condition: options.condition },
-    });
+  async wait(options: { condition?: string | string[]; interval?: string } = {}): Promise<number> {
+    const cond = options.condition;
+    const res = await this.client.post<{ StatusCode: number } | number | string>(
+      `/containers/${this.id}/wait`,
+      {
+        params: {
+          condition:
+            cond === undefined ? undefined : Array.isArray(cond) ? cond : [cond],
+          interval: options.interval,
+        },
+      },
+    );
     res.raiseForStatus();
-    return res.data.StatusCode;
+    const d = res.data;
+    if (typeof d === "number") return d;
+    if (typeof d === "string") return parseInt(d, 10);
+    return (d as { StatusCode: number }).StatusCode;
   }
 
-  async remove(options: { force?: boolean; volumes?: boolean } = {}): Promise<void> {
+  async remove(
+    options: {
+      force?: boolean;
+      volumes?: boolean;
+      depend?: boolean;
+      ignore?: boolean;
+      timeout?: number;
+    } = {},
+  ): Promise<void> {
     const res = await this.client.delete(`/containers/${this.id}`, {
-      params: { force: options.force, v: options.volumes },
+      params: {
+        force: options.force,
+        v: options.volumes,
+        depend: options.depend,
+        ignore: options.ignore,
+        timeout: options.timeout,
+      },
     });
     res.raiseForStatus();
   }
@@ -99,8 +125,10 @@ export class Container extends PodmanResource {
     res.raiseForStatus();
   }
 
-  async inspect(): Promise<Record<string, unknown>> {
-    const res = await this.client.get<Record<string, unknown>>(`/containers/${this.id}/json`);
+  async inspect(options: { size?: boolean } = {}): Promise<Record<string, unknown>> {
+    const res = await this.client.get<Record<string, unknown>>(`/containers/${this.id}/json`, {
+      params: { size: options.size },
+    });
     res.raiseForStatus();
     return res.data;
   }
@@ -155,10 +183,224 @@ export class Container extends PodmanResource {
     return res.data;
   }
 
-  async diff(): Promise<Array<Record<string, unknown>>> {
+  async diff(
+    options: { parent?: string; diffType?: "all" | "container" | "image" } = {},
+  ): Promise<Array<Record<string, unknown>>> {
     const res = await this.client.get<Array<Record<string, unknown>>>(
       `/containers/${this.id}/changes`,
+      { params: { parent: options.parent, diffType: options.diffType } },
     );
+    res.raiseForStatus();
+    return res.data;
+  }
+
+  async getArchive(containerPath: string, options: { rename?: string } = {}): Promise<ArrayBuffer> {
+    const res = await this.client.get<ArrayBuffer>(`/containers/${this.id}/archive`, {
+      params: { path: containerPath, rename: options.rename },
+      parseAs: "arraybuffer",
+    });
+    res.raiseForStatus();
+    return res.data;
+  }
+
+  async putArchive(
+    containerPath: string,
+    archive: ArrayBuffer | Uint8Array | Blob,
+    options: { pause?: boolean } = {},
+  ): Promise<void> {
+    const res = await this.client.put(`/containers/${this.id}/archive`, {
+      params: { path: containerPath, pause: options.pause ?? true },
+      data: archive,
+      headers: { "Content-Type": "application/x-tar" },
+    });
+    res.raiseForStatus();
+  }
+
+  /**
+   * Attach to the container (raw stream). Check `response.ok`; the body uses Docker raw-stream
+   * or multiplexed framing depending on server version and TTY settings.
+   */
+  async attach(
+    options: {
+      detachKeys?: string;
+      logs?: boolean;
+      stream?: boolean;
+      stdout?: boolean;
+      stderr?: boolean;
+      stdin?: boolean;
+    } = {},
+  ): Promise<Response> {
+    const res = await this.client.rawRequest("POST", `/containers/${this.id}/attach`, {
+      params: {
+        detachKeys: options.detachKeys,
+        logs: options.logs,
+        stream: options.stream,
+        stdout: options.stdout,
+        stderr: options.stderr,
+        stdin: options.stdin,
+      },
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      let message = body;
+      try {
+        const j = JSON.parse(body) as Record<string, string>;
+        message = j["cause"] ?? j["message"] ?? body;
+      } catch {
+        /* keep text */
+      }
+      throw new APIError(message, res.status);
+    }
+    return res;
+  }
+
+  async checkpoint(
+    options: {
+      keep?: boolean;
+      leaveRunning?: boolean;
+      tcpEstablished?: boolean;
+      exportTar?: boolean;
+      ignoreRootFS?: boolean;
+      ignoreVolumes?: boolean;
+      preCheckpoint?: boolean;
+      withPrevious?: boolean;
+      fileLocks?: boolean;
+      printStats?: boolean;
+    } = {},
+  ): Promise<Record<string, unknown> | ArrayBuffer> {
+    const asTar = options.exportTar === true;
+    const res = await this.client.post<Record<string, unknown> | ArrayBuffer>(
+      `/containers/${this.id}/checkpoint`,
+      {
+        params: {
+          keep: options.keep,
+          leaveRunning: options.leaveRunning,
+          tcpEstablished: options.tcpEstablished,
+          export: options.exportTar,
+          ignoreRootFS: options.ignoreRootFS,
+          ignoreVolumes: options.ignoreVolumes,
+          preCheckpoint: options.preCheckpoint,
+          withPrevious: options.withPrevious,
+          fileLocks: options.fileLocks,
+          printStats: options.printStats,
+        },
+        parseAs: asTar ? "arraybuffer" : "json",
+      },
+    );
+    res.raiseForStatus();
+    return res.data;
+  }
+
+  async restore(
+    options: {
+      restoreAsName?: string;
+      keep?: boolean;
+      tcpEstablished?: boolean;
+      tcpClose?: boolean;
+      importCheckpoint?: boolean;
+      ignoreRootFS?: boolean;
+      ignoreVolumes?: boolean;
+      ignoreStaticIP?: boolean;
+      ignoreStaticMAC?: boolean;
+      fileLocks?: boolean;
+      printStats?: boolean;
+      pod?: string;
+    } = {},
+  ): Promise<Record<string, unknown>> {
+    const res = await this.client.post<Record<string, unknown>>(`/containers/${this.id}/restore`, {
+      params: {
+        name: options.restoreAsName,
+        keep: options.keep,
+        tcpEstablished: options.tcpEstablished,
+        tcpClose: options.tcpClose,
+        import: options.importCheckpoint,
+        ignoreRootFS: options.ignoreRootFS,
+        ignoreVolumes: options.ignoreVolumes,
+        ignoreStaticIP: options.ignoreStaticIP,
+        ignoreStaticMAC: options.ignoreStaticMAC,
+        fileLocks: options.fileLocks,
+        printStats: options.printStats,
+        pod: options.pod,
+      },
+    });
+    res.raiseForStatus();
+    return res.data;
+  }
+
+  async createExec(control: Record<string, unknown>): Promise<ExecInstance> {
+    const res = await this.client.post<Record<string, unknown>>(`/containers/${this.id}/exec`, {
+      data: control,
+      headers: { "Content-Type": "application/json" },
+    });
+    res.raiseForStatus(NotFound);
+    const id = (res.data["Id"] ?? res.data["id"]) as string | undefined;
+    if (!id) throw new PodmanError("Exec API did not return an Id");
+    return new ExecInstance(id, this.client);
+  }
+
+  async exportRootfs(): Promise<ArrayBuffer> {
+    const res = await this.client.get<ArrayBuffer>(`/containers/${this.id}/export`, {
+      parseAs: "arraybuffer",
+    });
+    res.raiseForStatus();
+    return res.data;
+  }
+
+  async runHealthcheck(): Promise<Record<string, unknown>> {
+    const res = await this.client.get<Record<string, unknown>>(`/containers/${this.id}/healthcheck`);
+    res.raiseForStatus();
+    return res.data;
+  }
+
+  async init(): Promise<void> {
+    const res = await this.client.post(`/containers/${this.id}/init`);
+    if (res.status !== 204 && res.status !== 304) res.raiseForStatus();
+  }
+
+  async mount(options: { external?: boolean } = {}): Promise<string> {
+    const res = await this.client.post<string>(`/containers/${this.id}/mount`, {
+      params: { external: options.external },
+    });
+    res.raiseForStatus();
+    return typeof res.data === "string" ? res.data : String(res.data);
+  }
+
+  async unmount(): Promise<void> {
+    const res = await this.client.post(`/containers/${this.id}/unmount`);
+    res.raiseForStatus();
+  }
+
+  async resizeTerminal(options: {
+    height?: number;
+    width?: number;
+    running?: boolean;
+  }): Promise<void> {
+    const res = await this.client.post(`/containers/${this.id}/resize`, {
+      params: { h: options.height, w: options.width, running: options.running },
+    });
+    res.raiseForStatus();
+  }
+
+  async update(
+    body: Record<string, unknown>,
+    options: { restartPolicy?: string; restartRetries?: number } = {},
+  ): Promise<Record<string, unknown>> {
+    const res = await this.client.post<Record<string, unknown>>(`/containers/${this.id}/update`, {
+      params: {
+        restartPolicy: options.restartPolicy,
+        restartRetries: options.restartRetries,
+      },
+      data: body,
+      headers: { "Content-Type": "application/json" },
+    });
+    res.raiseForStatus();
+    return res.data;
+  }
+
+  async stats(options: { stream?: boolean } = {}): Promise<Record<string, unknown>> {
+    const res = await this.client.get<Record<string, unknown>>(`/containers/${this.id}/stats`, {
+      params: { stream: options.stream ?? false },
+    });
     res.raiseForStatus();
     return res.data;
   }
@@ -196,6 +438,12 @@ export class Container extends PodmanResource {
 export interface ContainerListOptions {
   all?: boolean;
   limit?: number;
+  /** Alias for `limit` in the Podman API. */
+  last?: number;
+  external?: boolean;
+  namespace?: boolean;
+  size?: boolean;
+  sync?: boolean;
   filters?: Record<string, string | string[]>;
   since?: string;
   before?: string;
@@ -297,6 +545,11 @@ export class ContainersManager extends Manager<Container> {
       params: {
         all: options.all,
         limit: options.limit,
+        last: options.last,
+        external: options.external,
+        namespace: options.namespace,
+        size: options.size,
+        sync: options.sync,
         filters: prepareFilters(options.filters),
         since: options.since,
         before: options.before,
@@ -306,11 +559,69 @@ export class ContainersManager extends Manager<Container> {
     return res.data.map((attrs) => this.prepareModel(attrs));
   }
 
-  async remove(id: string, options: { force?: boolean; volumes?: boolean } = {}): Promise<void> {
+  async remove(
+    id: string,
+    options: {
+      force?: boolean;
+      volumes?: boolean;
+      depend?: boolean;
+      ignore?: boolean;
+      timeout?: number;
+    } = {},
+  ): Promise<void> {
     const res = await this.client.delete(`/containers/${encodeURIComponent(id)}`, {
-      params: { force: options.force, v: options.volumes },
+      params: {
+        force: options.force,
+        v: options.volumes,
+        depend: options.depend,
+        ignore: options.ignore,
+        timeout: options.timeout,
+      },
     });
     res.raiseForStatus();
+  }
+
+  /**
+   * Resource usage for one or more containers. With `stream: true`, returns one parsed JSON object
+   * per non-empty line in the response body.
+   */
+  async stats(
+    options: {
+      containers?: string[];
+      stream?: boolean;
+      interval?: number;
+      all?: boolean;
+    } = {},
+  ): Promise<Record<string, unknown> | Record<string, unknown>[]> {
+    const stream = options.stream ?? false;
+    const res = await this.client.get<Record<string, unknown> | Record<string, unknown>[] | string>(
+      `/containers/stats`,
+      {
+        params: {
+          containers: options.containers,
+          stream,
+          interval: options.interval,
+          all: options.all,
+        },
+        parseAs: stream ? "text" : "json",
+      },
+    );
+    res.raiseForStatus();
+    if (stream) {
+      const text = res.data as string;
+      return text
+        .trim()
+        .split("\n")
+        .filter(Boolean)
+        .map((line) => JSON.parse(line) as Record<string, unknown>);
+    }
+    return res.data as Record<string, unknown> | Record<string, unknown>[];
+  }
+
+  async showMounted(): Promise<Record<string, string>> {
+    const res = await this.client.get<Record<string, string>>(`/containers/showmounted`);
+    res.raiseForStatus();
+    return res.data;
   }
 
   async prune(filters?: Record<string, string>): Promise<Record<string, unknown>> {

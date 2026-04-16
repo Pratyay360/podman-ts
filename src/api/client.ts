@@ -1,9 +1,50 @@
-/**
+  /**
  * APIClient — low-level HTTP client for the Podman service.
  * Uses Bun's native fetch with Unix-socket support (no axios / node:http needed).
  */
 
 import { APIError, NotFound, PodmanError } from "../errors";
+
+/** Attach fetch body and Content-Type; respects existing Content-Type in `headers`. */
+export function attachRequestBody(
+  headers: Record<string, string>,
+  data: unknown,
+): ArrayBuffer | Uint8Array | Blob | FormData | string | undefined {
+  if (data === undefined) return undefined;
+
+  if (data instanceof FormData) {
+    delete headers["Content-Type"];
+    return data;
+  }
+
+  if (data instanceof ArrayBuffer) {
+    headers["Content-Type"] ??= "application/octet-stream";
+    return data;
+  }
+
+  if (data instanceof Uint8Array) {
+    headers["Content-Type"] ??= "application/octet-stream";
+    return data;
+  }
+
+  if (typeof Blob !== "undefined" && data instanceof Blob) {
+    headers["Content-Type"] ??= "application/octet-stream";
+    return data;
+  }
+
+  if (typeof Buffer !== "undefined" && Buffer.isBuffer(data)) {
+    headers["Content-Type"] ??= "application/octet-stream";
+    return new Uint8Array(data);
+  }
+
+  if (typeof data === "string") {
+    headers["Content-Type"] ??= "application/json";
+    return data;
+  }
+
+  headers["Content-Type"] ??= "application/json";
+  return JSON.stringify(data);
+}
 
 export interface APIClientOptions {
   /** Full URL to Podman service, e.g. "http+unix:///run/podman/podman.sock" */
@@ -22,6 +63,11 @@ export interface RequestConfig {
   data?: unknown;
   /** Use Docker-compat URL prefix instead of libpod. */
   compatible?: boolean;
+  /**
+   * How to read the response body. When omitted, JSON is used if Content-Type is
+   * application/json, otherwise text.
+   */
+  parseAs?: "json" | "text" | "arraybuffer";
 }
 
 const DEFAULT_VERSION = "v5.0.0";
@@ -32,7 +78,14 @@ function buildQuery(params?: Record<string, unknown>): string {
   const qs = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) {
     if (v === null || v === undefined) continue;
-    qs.append(k, String(v));
+    if (Array.isArray(v)) {
+      for (const item of v) {
+        if (item === null || item === undefined) continue;
+        qs.append(k, String(item));
+      }
+    } else {
+      qs.append(k, String(v));
+    }
   }
   const s = qs.toString();
   return s ? `?${s}` : "";
@@ -181,11 +234,9 @@ export class APIClient {
 
     if (this.unix) fetchOptions.unix = this.unix;
 
-    if (config.data !== undefined) {
-      fetchOptions.body =
-        typeof config.data === "string" ? config.data : JSON.stringify(config.data);
-      (fetchOptions.headers as Record<string, string>)["Content-Type"] ??= "application/json";
-    }
+    const hdrs = fetchOptions.headers as Record<string, string>;
+    const bodyInit = attachRequestBody(hdrs, config.data);
+    if (bodyInit !== undefined) fetchOptions.body = bodyInit;
 
     if (this.timeout !== undefined) {
       fetchOptions.signal = AbortSignal.timeout(this.timeout);
@@ -193,16 +244,46 @@ export class APIClient {
 
     const res = await this.fetchWithRetry(url, fetchOptions);
 
-    // Parse body — try JSON first, fall back to text
     let body: unknown;
-    const ct = res.headers.get("content-type") ?? "";
-    if (ct.includes("application/json")) {
+    if (config.parseAs === "arraybuffer") {
+      body = await res.arrayBuffer();
+    } else if (config.parseAs === "text") {
+      body = await res.text();
+    } else if (config.parseAs === "json") {
       body = await res.json();
     } else {
-      body = await res.text();
+      const ct = res.headers.get("content-type") ?? "";
+      if (ct.includes("application/json")) {
+        body = await res.json();
+      } else {
+        body = await res.text();
+      }
     }
 
     return new APIResponse<T>(res.status, body);
+  }
+
+  /**
+   * Low-level fetch returning the raw Response (no body parsing).
+   * Useful for attach/exec streams and hijacked connections.
+   */
+  async rawRequest(method: string, path: string, config: RequestConfig = {}): Promise<Response> {
+    const url = this.buildUrl(path, config.compatible ?? false, config.params);
+    const fetchOptions: RequestInit & { unix?: string } = {
+      method,
+      headers: { ...config.headers },
+    };
+    if (this.unix) fetchOptions.unix = this.unix;
+
+    const hdrs = fetchOptions.headers as Record<string, string>;
+    const bodyInit = attachRequestBody(hdrs, config.data);
+    if (bodyInit !== undefined) fetchOptions.body = bodyInit;
+
+    if (this.timeout !== undefined) {
+      fetchOptions.signal = AbortSignal.timeout(this.timeout);
+    }
+
+    return this.fetchWithRetry(url, fetchOptions);
   }
 
   get<T = unknown>(path: string, config?: RequestConfig): Promise<APIResponse<T>> {
