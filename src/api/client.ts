@@ -5,6 +5,10 @@
 
 import { APIError, NotFound, PodmanError } from "../errors";
 
+interface FetchOptions extends globalThis.RequestInit {
+  unix?: string;
+}
+
 export interface APIClientOptions {
   /** Full URL to Podman service, e.g. "http+unix:///run/podman/podman.sock" */
   baseUrl: string;
@@ -225,7 +229,15 @@ export class APIClient {
     return this.request<T>("PATCH", path, config);
   }
 
-  head(path: string): Promise<APIResponse> {
-    return this.request("HEAD", path);
+  head(path: string, config?: RequestConfig): Promise<APIResponse> {
+    return this.request("HEAD", path, config);
   }
+
+  options<T = unknown>(path: string, config?: RequestConfig): Promise<APIResponse<T>> {
+    return this.request<T>("OPTIONS", path, config);
+  }
+}
+
+function setTimeout(r: (value: void | PromiseLike<void>) => void, ms: number): void {
+  throw new Error("Function not implemented.");
 }

@@ -34,6 +34,33 @@ describe("APIClient", () => {
       "http://localhost:8080/v5.0.0/compat/images/json",
     );
   });
+
+  test("head and options forward config to request", async () => {
+    const client = new APIClient({ baseUrl: "http://localhost:8080", version: "v5.0.0" });
+    const calls: Array<{ method: string; path: string; config: unknown }> = [];
+
+    // @ts-ignore - mocking private request for method forwarding verification
+    client.request = async (method: string, path: string, config: unknown) => {
+      calls.push({ method, path, config });
+      return new APIResponse(200, "");
+    };
+
+    await client.head("/health", { headers: { Accept: "text/plain" } });
+    await client.options("/system/connection", { params: { verbose: true } });
+
+    expect(calls).toEqual([
+      {
+        method: "HEAD",
+        path: "/health",
+        config: { headers: { Accept: "text/plain" } },
+      },
+      {
+        method: "OPTIONS",
+        path: "/system/connection",
+        config: { params: { verbose: true } },
+      },
+    ]);
+  });
 });
 
 describe("APIResponse", () => {
