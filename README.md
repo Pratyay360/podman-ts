@@ -1,38 +1,32 @@
 # podman-ts
 
-TypeScript/Bun bindings for the Podman RESTful API (libpod). This library provides a high-level, type-safe interface for managing containers, images, pods, networks, quadlets, and more, using Podman's REST API.
+TypeScript/Bun bindings for the Podman RESTful API (libpod). This library provides a high-level, type-safe interface for managing containers, images, pods, networks, volumes, secrets, manifests, quadlets, and more.
 
-> Note: Due to its utilization of high-performance Bun-native APIs (such as `Bun.spawn` and `Bun.file`), this library currently requires the [Bun](https://bun.sh) runtime.
+> **Runtime:** The library uses Bun-native APIs (`Bun.spawn`, `Bun.file`, Unix-socket `fetch`). Install and run with [Bun](https://bun.sh) (`bun >=1.0`). `package.json` also declares Node `>= 18` for tooling compatibility; execution is intended under Bun.
 
 ## Installation
 
 ```bash
-# npm
-npm install podman-ts
-
-# bun
-bun add podman-ts
+npm install @pratyay360/podman-ts
+# or
+bun add @pratyay360/podman-ts
 ```
 
-## Quick Start
+## Quick start
 
 ```typescript
-import { PodmanClient } from "podman-ts";
+import { PodmanClient } from "@pratyay360/podman-ts";
 
-// Connect to the default local Podman socket
 const client = new PodmanClient();
 
-// List all containers
 const containers = await client.containers.list({ all: true });
 for (const container of containers) {
   console.log(`${container.id} - ${container.name} (${container.status})`);
 }
 
-// Pull an image
 const image = await client.images.pull("docker.io/library/nginx:latest");
 console.log(`Pulled: ${image.tags.join(", ")}`);
 
-// Start a container
 const container = await client.containers.create({
   image: "nginx",
   name: "my-nginx",
@@ -40,154 +34,243 @@ const container = await client.containers.create({
 });
 await container.start();
 
-// Get logs
 const logs = await container.logs();
 console.log(logs);
 
-// Clean up
 await container.stop();
 await container.remove();
 ```
 
-## PodmanClient Options
-
-The `PodmanClient` can be configured with several options:
+## `PodmanClient` options
 
 ```typescript
 const client = new PodmanClient({
-  baseUrl: "http+unix:///run/user/1000/podman/podman.sock", // Direct URL
-  connection: "my-remote-machine", // Named connection from containers.conf
-  version: "5.0.0", // API version override
-  timeout: 5000, // Request timeout in ms
+  baseUrl: "http+unix:///run/user/1000/podman/podman.sock",
+  connection: "my-remote-machine",
+  version: "5.0.0",
+  timeout: 5000,
 });
 ```
 
-### Automatic Connection Discovery
+| Option        | Description |
+|---------------|-------------|
+| `baseUrl`     | Full service URL (`http+unix://…`, `http://…`, `tcp://…` mapped to HTTP). `ssh://` / `http+ssh://` are not supported directly; use a tunnel and connect via `tcp://` or a Unix socket. |
+| `connection`  | Named service from `containers.conf` / Podman connection config (via `PodmanConfig`). |
+| `version`     | API version segment for paths. Default: `v5.0.0` (see `APIClient` in `src/api/client.ts`). |
+| `timeout`     | Request timeout in milliseconds. |
 
-By default, `PodmanClient` attempts to find the Podman service in the following order:
+The client exposes **`client.api`** (`APIClient`) for arbitrary libpod/compat requests. Convenience getters return promises: **`client.ping`**, **`client.version`**, **`client.info`**, **`client.df`**. Call **`client.close()`** (or use `using` / `Symbol.dispose`) when you want a disposal hook; today it is a no-op.
 
-1. `baseUrl` if provided in options.
-2. `connection` name if provided in options (searches `containers.conf` and `podman-connections.json`).
-3. `CONTAINER_HOST` environment variable.
-4. `DOCKER_HOST` environment variable.
-5. Default local Unix socket path (e.g., `/run/podman/podman.sock` for root or `/run/user/ID/podman/podman.sock` for rootless).
+### Default connection (no `baseUrl`)
 
-You can also use the shorthand factory:
+If **`baseUrl`** is omitted:
+
+1. If **`connection`** is set, that named service URL is used.
+2. Otherwise, **`PodmanConfig`** is read: if the **active service** is a Podman **machine**, its URL is used.
+3. Otherwise the **local Unix socket** is used (`/run/podman/podman.sock` as root, or `$XDG_RUNTIME_DIR/podman/podman.sock` for rootless).
+
+Environment variables **`CONTAINER_HOST`** and **`DOCKER_HOST`** are **not** read by `new PodmanClient()`.
+
+### Environment-based URL
+
+Use the factory so **`CONTAINER_HOST`** or **`DOCKER_HOST`** wins over the default socket:
 
 ```typescript
-import { fromEnv } from "podman-ts";
+import { fromEnv, PodmanClient } from "@pratyay360/podman-ts";
+
 const client = fromEnv();
+// same as:
+const same = PodmanClient.fromEnv();
 ```
 
-## Resource Managers
+## API coverage
 
-The client provides access to various managers for different resource types:
+Podman’s HTTP surface is large (see the project’s `swagger-latest.yaml` for the full spec). **This package implements a curated subset** focused on common container workflows. For operations that are not wrapped yet, use **`client.api`** (`get`, `post`, `put`, `patch`, `delete`, `head`) with libpod paths (default prefix `/v{version}/libpod`) or **`compatible: true`** for `/v{version}/compat` (e.g. registry **`/auth`** for `system.login`).
 
-### Containers (`client.containers`)
+## Resource managers
 
-- `list(options?)`: List containers.
-- `get(id)`: Get a container instance.
-- `create(opts)`: Create a new container.
-- `run(image, command?, options?)`: Create and start a container, returning logs or the container instance.
-- `exists(id)`: Check if a container exists.
-- `prune(filters?)`: Delete stopped containers.
+### Containers — `client.containers`
 
-#### Container Instance Methods
+| Method | Description |
+|--------|-------------|
+| `list(options?)` | List containers (`all`, `limit`, `filters`, `since`, `before`). |
+| `get(id, options?)` | Load a container; optional `{ compatible?: boolean }`. |
+| `create(opts)` | Create a container; returns a **`Container`** instance. |
+| `run(image, command?, options?)` | Create, start, wait (unless `detach`), optionally return logs or throw **`ContainerError`** on non-zero exit. |
+| `exists(id)` | Whether the container exists. |
+| `remove(id, options?)` | Remove by id (`force`, `volumes`). |
+| `prune(filters?)` | Remove stopped containers. |
 
-- `start()`, `stop()`, `restart()`, `kill(signal?)`
-- `pause()`, `unpause()`
-- `remove(options?)`
-- `inspect()`, `logs(options?)`, `top()`, `diff()`
-- `wait(options?)`: Wait for container to reach a state.
-- `rename(name)`
-- `commit(options?)`: Create an image from the container.
+**`Container` instance:** `start`, `stop`, `restart`, `kill`, `pause`, `unpause`, `wait`, `remove`, `rename`, `inspect` (GET json), `logs` (string or `AsyncIterable` when `stream: true`), `top`, `diff`, `commit`, `reload`.
 
-### Images (`client.images`)
+### Images — `client.images`
 
-- `list(options?)`: List local images.
-- `get(name)`: Get an image instance.
-- `pull(repo, options?)`: Pull an image from a registry.
-- `push(repo, options?)`: Push an image to a registry.
-- `build(options)`: Build an image from a Dockerfile/context.
-- `search(term, options?)`: Search for images on registries.
-- `exists(name)`: Check if image exists locally.
-- `prune(options?)`: Remove unused images.
+| Method | Description |
+|--------|-------------|
+| `list(options?)` | List images (`name` maps to `reference` filter, `all`, `filters`). |
+| `get(name)` | Inspect by name/id. |
+| `pull(repository, options?)` | Pull (`tag`, `allTags`, `quiet`, `tlsVerify`). |
+| `push(repository, options?)` | Push (`tag`, `tlsVerify`). |
+| `build(options)` | POST tarball context to `/build`; requires `path` to context dir; uses `tar` via **`Bun.spawn`**. |
+| `search(term, options?)` | Search registries. |
+| `exists(name)` | Whether the image exists. |
+| `remove(name, options?)` | Remove by reference. |
+| `prune(options?)` | Prune unused images. |
 
-#### Image Instance Methods
+**`Image` instance:** `history`, `tag`, `remove`, `reload`. Use **`get()`** / **`reload()`** for fresh inspect data (there is no separate `inspect()` on the instance).
 
-- `inspect()`, `history()`, `tag(repo, tag?)`, `remove()`
+### Pods — `client.pods`
 
-### Pods (`client.pods`)
+| Method | Description |
+|--------|-------------|
+| `create(name, options?)` | Create pod (`name` plus JSON body fields). |
+| `list(options?)` | List pods (`filters`). |
+| `get(id)` | Inspect pod. |
+| `exists(id)` | Whether the pod exists. |
+| `remove(id, options?)` | Remove (`force`). |
+| `prune(filters?)` | Prune pods. |
+| `stats(options?)` | Pod stats (`all`). |
 
-- `list()`, `get(id)`, `create(opts)`, `exists(id)`, `remove(id)`, `prune()`
-- Pod instance methods: `start()`, `stop()`, `restart()`, `pause()`, `unpause()`, `inspect()`
+**`Pod` instance:** `start`, `stop`, `restart`, `kill`, `pause`, `unpause`, `remove`, `top`, `reload`. There is no `inspect()` method; use **`reload()`** or **`pods.get()`**.
 
-### Quadlets (`client.quadlets`)
+### Networks — `client.networks`
 
-- `list(options?)`: List systemd quadlets.
-- `get(name)`: Get a quadlet instance.
-- `install(files, options?)`: Install one or more quadlet files.
-- `getContents(name)`: Read the raw systemd unit file contents.
-- `delete(name?, options?)`: Delete quadlets (pass `all: true` to delete all).
-- `exists(name)`: Check if a quadlet exists.
+| Method | Description |
+|--------|-------------|
+| `create(name, options?)` | Create (`driver`, `dnsEnabled`, `networkDnsServers`, `enableIpv6`, `internal`, `labels`, `options`). |
+| `list(options?)` | List (`filters`). |
+| `get(key)` | Inspect. |
+| `exists(key)` | Whether the network exists. |
+| `remove(name, options?)` | Delete (`force`). |
+| `prune(filters?)` | Prune. |
 
-#### Quadlet Instance Methods
+**`Network` instance:** `connect`, `disconnect`, `remove`, `reload`.
 
-- `getContents()`, `delete(options?)`
+### Volumes — `client.volumes`
 
-### Other Managers
+| Method | Description |
+|--------|-------------|
+| `create(name?, options?)` | Create (`driver`, `driverOpts`, `labels`). |
+| `list(options?)` | List (`filters`). |
+| `get(volumeId)` | Load model from inspect. |
+| `exists(key)` | Whether the volume exists. |
+| `remove(name, options?)` | Remove (`force`). |
+| `prune(filters?)` | Prune. |
 
-- `client.networks`: Manage container networks.
-- `client.volumes`: Manage persistent volumes.
-- `client.secrets`: Manage Podman secrets.
-- `client.manifests`: Manage manifest lists.
-- `client.system`: System-level operations (`info()`, `df()`, `version()`, `ping()`, `login()`).
-- `client.events`: historical `list()` and real-time `stream()` of Podman events.
+**`Volume` instance:** `inspect`, `remove`, `reload`.
 
-## Advanced Usage
+### Secrets — `client.secrets`
 
-### Streaming Logs and Events
+| Method | Description |
+|--------|-------------|
+| `create(name, data, options?)` | Create (`labels`, `driver`); `data` is string or `Buffer` (sent base64 for binary). |
+| `list(options?)` | List (`filters`). |
+| `get(secretId)` | Inspect. |
+| `exists(key)` | Whether the secret exists (GET json). |
+| `remove(secretId, options?)` | Delete (`all`). |
 
-Many methods support streaming via `AsyncIterable`:
+**`Secret` instance:** `remove`.
+
+### Manifests — `client.manifests`
+
+| Method | Description |
+|--------|-------------|
+| `create(name, images?, all?)` | Create manifest list. |
+| `get(key)` | Inspect. |
+| `exists(key)` | Whether the manifest exists. |
+| `list()` | **Throws** — the service does not expose list in this client. |
+| `removeManifest(name)` | Delete manifest by name. |
+
+**`Manifest` instance:** `add`, `push`, `remove` (by digest), `reload`.
+
+### Quadlets — `client.quadlets`
+
+| Method | Description |
+|--------|-------------|
+| `list(options?)` | List quadlets (`filters`). |
+| `get(name)` | Resolve by filtering list. |
+| `install(files, options?)` | POST tarball or `FormData` (`replace`, `reloadSystemd`). |
+| `getContents(name)` | Raw unit file contents. |
+| `delete(name?, options?)` | Delete one or **`all: true`** (`force`, `ignore`, `reloadSystemd`). |
+| `exists(name)` | Whether the quadlet exists. |
+
+**`Quadlet` instance:** `getContents`, `delete`.
+
+### System — `client.system`
+
+| Method | Description |
+|--------|-------------|
+| `ping()` | `HEAD /_ping`. |
+| `info()` | GET `/info`. |
+| `version(options?)` | GET `/version`; can strip `APIVersion` when `apiVersion: false`. |
+| `df()` | Disk usage summary. |
+| `login(username, options?)` | POST **`/auth`** with **`compatible: true`** (`password`, `email`, `registry`, `tlsVerify`). |
+
+### Events — `client.events`
+
+| Method | Description |
+|--------|-------------|
+| `list(options?)` | Async generator over `/events` with `stream: true`. Yields lines as strings, or parsed objects if `decode: true` (`since`, `until`, `filters`). |
+
+There is no separate **`stream()`** method; use **`for await … of client.events.list()`**.
+
+## Advanced usage
+
+### Streaming logs
 
 ```typescript
-// Stream container logs
 const logStream = await container.logs({ stream: true, follow: true });
 for await (const chunk of logStream) {
-  process.stdout.write(chunk);
-}
-
-// Stream system events
-for await (const event of client.events.stream()) {
-  console.log(`${event.Status} ${event.Type} ${event.Action}`);
+  process.stdout.write(chunk + "\n");
 }
 ```
 
-### Error Handling
-
-The library provides specific error classes for better error handling:
+### Streaming events
 
 ```typescript
-import { NotFound, ImageNotFound, APIError } from "podman-ts";
+for await (const line of client.events.list({ decode: true })) {
+  const event = line as Record<string, unknown>;
+  console.log(event);
+}
+```
+
+### Error handling
+
+```typescript
+import { NotFound, ImageNotFound, APIError } from "@pratyay360/podman-ts";
 
 try {
   await client.images.get("non-existent-image");
 } catch (err) {
   if (err instanceof ImageNotFound) {
-    // Handle missing image
+    // missing image
   } else if (err instanceof APIError) {
-    console.error(`API Error ${err.statusCode}: ${err.message}`);
+    console.error(`${err.statusCode}: ${err.message}`);
   }
 }
 ```
 
-### Docker Compatibility
+Exported error classes include **`PodmanError`**, **`APIError`**, **`NotFound`**, **`ImageNotFound`**, **`BuildError`**, **`ContainerError`**, **`InvalidArgument`**, **`StreamParseError`**.
 
-For easier migration from `dockerode` or other Docker clients, an alias is provided:
+### Docker-compatible alias
 
 ```typescript
-import { DockerClient } from "podman-ts";
+import { DockerClient } from "@pratyay360/podman-ts";
 const client = new DockerClient();
+```
+
+### Extra exports
+
+For custom tooling you can import **`APIClient`**, **`APIResponse`**, helpers (**`prepareFilters`**, **`prepareBody`**, **`encodeAuthHeader`**, …), **`PodmanConfig`**, **`IPAMConfig` / `IPAMPool`**, **`jsonStream` / `lineStream`**, base **`Manager` / `PodmanResource`**, and version constants (**`VERSION`**, **`API_VERSION`**, **`COMPATIBLE_VERSION`**) from the package entry (`src/index.ts`).
+
+## Development
+
+```bash
+bun install
+bun run lint
+bun run typecheck
+bun test
+bun run build
 ```
 
 ## License

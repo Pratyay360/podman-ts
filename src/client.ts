@@ -97,7 +97,9 @@ export class PodmanClient {
   }
 
   get containers(): ContainersManager {
-    return (this._containers ??= new ContainersManager(this.api));
+    const mgr = (this._containers ??= new ContainersManager(this.api));
+    (mgr as unknown as { podmanClient?: PodmanClient }).podmanClient = this;
+    return mgr;
   }
 
   get images(): ImagesManager {
