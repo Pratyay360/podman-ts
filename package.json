@@ -50,10 +50,12 @@
     "prepare": "bun run lint && bun run build",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
-    "lint": "bunx oxlint .",
-    "format": "bunx oxfmt . --write"
+    "lint": "bun oxlint .",
+    "format": "bun oxfmt . --write"
   },
   "dependencies": {
+    "oxfmt": "^0.45.0",
+    "oxlint": "^1.60.0",
     "smol-toml": "^1.6.1"
   },
   "devDependencies": {

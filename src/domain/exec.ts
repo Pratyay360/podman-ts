@@ -16,7 +16,9 @@ export class ExecInstance {
     return res.data;
   }
 
-  async resize(options: { height?: number; width?: number; running?: boolean } = {}): Promise<void> {
+  async resize(
+    options: { height?: number; width?: number; running?: boolean } = {},
+  ): Promise<void> {
     const res = await this.client.post(`/exec/${this.id}/resize`, {
       params: { h: options.height, w: options.width, running: options.running },
     });

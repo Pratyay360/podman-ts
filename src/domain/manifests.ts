@@ -67,7 +67,7 @@ export class Manifest extends PodmanResource {
     };
     const res = await this.client.post(
       `/manifests/${this.quotedName}/registry/${encodeURIComponent(destination)}`,
-      { params: { all: options.all, destination }, headers },
+      { params: { all: options.all }, headers },
     );
     res.raiseForStatus();
   }
@@ -94,13 +94,14 @@ export class ManifestsManager extends Manager<Manifest> {
     return Manifest;
   }
 
-  async create(name: string, images?: Array<Image | string>, all?: boolean): Promise<Manifest> {
-    const params: Record<string, unknown> = {};
-    if (images) {
-      params["images"] = images.map((i) =>
-        i instanceof Image ? (i.attrs["RepoTags"] as string[])[0] : i,
-      );
+  async create(name: string, images: Array<Image | string>, all?: boolean): Promise<Manifest> {
+    if (images.length === 0) {
+      throw new TypeError("images must contain at least one image reference.");
     }
+    const params: Record<string, unknown> = {};
+    params["images"] = images.map((i) =>
+      i instanceof Image ? (i.attrs["RepoTags"] as string[])[0] : i,
+    );
     if (all !== undefined) params["all"] = all;
 
     const res = await this.client.post<{ Id: string }>(`/manifests/${encodeURIComponent(name)}`, {

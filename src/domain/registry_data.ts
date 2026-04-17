@@ -1,10 +1,10 @@
 /** Registry metadata about an Image. */
 
-import type { APIClient } from "../api/client"
-import { parseRepository } from "../api/utils"
-import { InvalidArgument } from "../errors"
-import type { Image } from "./images"
-import { type Manager, PodmanResource } from "./manager"
+import type { APIClient } from "../api/client";
+import { parseRepository } from "../api/utils";
+import { InvalidArgument } from "../errors";
+import type { Image } from "./images";
+import { type Manager, PodmanResource } from "./manager";
 
 export class RegistryData extends PodmanResource {
   readonly imageName: string;

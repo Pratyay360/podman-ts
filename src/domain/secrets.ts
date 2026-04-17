@@ -1,4 +1,5 @@
 import type { Buffer } from "node:buffer";
+import { prepareFilters } from "../api/utils";
 import { NotFound } from "../errors";
 import { Manager, PodmanResource } from "./manager";
 
@@ -16,7 +17,7 @@ export class Secret extends PodmanResource {
   }
 
   async remove(options: { all?: boolean } = {}): Promise<void> {
-    const res = await this.client.delete(`/secrets/${this.id}`, {
+    const res = await this.client.delete(`/secrets/${encodeURIComponent(this.id ?? "")}`, {
       params: { all: options.all },
     });
     res.raiseForStatus(NotFound);
@@ -26,6 +27,9 @@ export class Secret extends PodmanResource {
 export interface SecretCreateOptions {
   labels?: Record<string, string>;
   driver?: string;
+  driverOpts?: Record<string, string>;
+  replace?: boolean;
+  ignore?: boolean;
 }
 
 export class SecretsManager extends Manager<Secret> {
@@ -38,10 +42,19 @@ export class SecretsManager extends Manager<Secret> {
     data: Buffer | string,
     options: SecretCreateOptions = {},
   ): Promise<Secret> {
+    const payload = typeof data === "string" ? data : new Uint8Array(data);
     const res = await this.client.post<Record<string, unknown>>("/secrets/create", {
-      params: { name, driver: options.driver, labels: options.labels },
-      data: typeof data === "string" ? data : data.toString("base64"),
-      headers: { "Content-Type": "application/json" },
+      params: {
+        name,
+        driver: options.driver,
+        driveropts: options.driverOpts ? JSON.stringify(options.driverOpts) : undefined,
+        labels: options.labels ? JSON.stringify(options.labels) : undefined,
+        replace: options.replace,
+        ignore: options.ignore,
+      },
+      data: payload,
+      headers:
+        typeof data === "string" ? { "Content-Type": "text/plain; charset=utf-8" } : undefined,
     });
     res.raiseForStatus();
     return this.get((res.data as { ID: string }).ID);
@@ -62,7 +75,7 @@ export class SecretsManager extends Manager<Secret> {
 
   async list(options: { filters?: Record<string, string> } = {}): Promise<Secret[]> {
     const res = await this.client.get<Record<string, unknown>[]>("/secrets/json", {
-      params: options.filters,
+      params: { filters: prepareFilters(options.filters) },
     });
     res.raiseForStatus();
     return res.data.map((attrs) => this.prepareModel(attrs));

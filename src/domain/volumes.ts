@@ -12,20 +12,24 @@ export class Volume extends PodmanResource {
   }
 
   async inspect(): Promise<Record<string, unknown>> {
-    const res = await this.client.get<Record<string, unknown>>(`/volumes/${this.name}/json`);
+    const res = await this.client.get<Record<string, unknown>>(
+      `/volumes/${encodeURIComponent(this.name ?? "")}/json`,
+    );
     res.raiseForStatus();
     return res.data;
   }
 
   async remove(options: { force?: boolean } = {}): Promise<void> {
-    const res = await this.client.delete(`/volumes/${this.name}`, {
+    const res = await this.client.delete(`/volumes/${encodeURIComponent(this.name ?? "")}`, {
       params: { force: options.force },
     });
     res.raiseForStatus();
   }
 
   async reload(): Promise<void> {
-    const res = await this.client.get<Record<string, unknown>>(`/volumes/${this.name}/json`);
+    const res = await this.client.get<Record<string, unknown>>(
+      `/volumes/${encodeURIComponent(this.name ?? "")}/json`,
+    );
     res.raiseForStatus(NotFound);
     this.attrs = res.data;
   }

@@ -1,4 +1,4 @@
-  /**
+/**
  * APIClient — low-level HTTP client for the Podman service.
  * Uses Bun's native fetch with Unix-socket support (no axios / node:http needed).
  */

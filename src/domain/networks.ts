@@ -14,7 +14,7 @@ export class Network extends PodmanResource {
   }
 
   async connect(container: string, options: { aliases?: string[] } = {}): Promise<void> {
-    const res = await this.client.post(`/networks/${this.name}/connect`, {
+    const res = await this.client.post(`/networks/${encodeURIComponent(this.name)}/connect`, {
       data: prepareBody({ Container: container, EndpointConfig: { Aliases: options.aliases } }),
       headers: { "Content-Type": "application/json" },
     });
@@ -22,7 +22,7 @@ export class Network extends PodmanResource {
   }
 
   async disconnect(container: string, options: { force?: boolean } = {}): Promise<void> {
-    const res = await this.client.post(`/networks/${this.name}/disconnect`, {
+    const res = await this.client.post(`/networks/${encodeURIComponent(this.name)}/disconnect`, {
       data: prepareBody({ Container: container, Force: options.force }),
       headers: { "Content-Type": "application/json" },
     });
@@ -30,14 +30,16 @@ export class Network extends PodmanResource {
   }
 
   async remove(options: { force?: boolean } = {}): Promise<void> {
-    const res = await this.client.delete(`/networks/${this.name}`, {
+    const res = await this.client.delete(`/networks/${encodeURIComponent(this.name)}`, {
       params: { force: options.force },
     });
     res.raiseForStatus();
   }
 
   async reload(): Promise<void> {
-    const res = await this.client.get<Record<string, unknown>>(`/networks/${this.name}/json`);
+    const res = await this.client.get<Record<string, unknown>>(
+      `/networks/${encodeURIComponent(this.name)}/json`,
+    );
     res.raiseForStatus(NotFound);
     this.attrs = res.data;
   }

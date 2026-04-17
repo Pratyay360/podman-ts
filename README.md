@@ -52,12 +52,12 @@ const client = new PodmanClient({
 });
 ```
 
-| Option        | Description |
-|---------------|-------------|
-| `baseUrl`     | Full service URL (`http+unix://…`, `http://…`, `tcp://…` mapped to HTTP). `ssh://` / `http+ssh://` are not supported directly; use a tunnel and connect via `tcp://` or a Unix socket. |
-| `connection`  | Named service from `containers.conf` / Podman connection config (via `PodmanConfig`). |
-| `version`     | API version segment for paths. Default: `v5.0.0` (see `APIClient` in `src/api/client.ts`). |
-| `timeout`     | Request timeout in milliseconds. |
+| Option       | Description                                                                                                                                                                            |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `baseUrl`    | Full service URL (`http+unix://…`, `http://…`, `tcp://…` mapped to HTTP). `ssh://` / `http+ssh://` are not supported directly; use a tunnel and connect via `tcp://` or a Unix socket. |
+| `connection` | Named service from `containers.conf` / Podman connection config (via `PodmanConfig`).                                                                                                  |
+| `version`    | API version segment for paths. Default: `v5.0.0` (see `APIClient` in `src/api/client.ts`).                                                                                             |
+| `timeout`    | Request timeout in milliseconds.                                                                                                                                                       |
 
 The client exposes **`client.api`** (`APIClient`) for arbitrary libpod/compat requests. Convenience getters return promises: **`client.ping`**, **`client.version`**, **`client.info`**, **`client.df`**. Call **`client.close()`** (or use `using` / `Symbol.dispose`) when you want a disposal hook; today it is a no-op.
 
@@ -91,125 +91,125 @@ Podman’s HTTP surface is large (see the project’s `swagger-latest.yaml` for 
 
 ### Containers — `client.containers`
 
-| Method | Description |
-|--------|-------------|
-| `list(options?)` | List containers (`all`, `limit`, `filters`, `since`, `before`). |
-| `get(id, options?)` | Load a container; optional `{ compatible?: boolean }`. |
-| `create(opts)` | Create a container; returns a **`Container`** instance. |
+| Method                           | Description                                                                                                   |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `list(options?)`                 | List containers (`all`, `limit`, `filters`, `since`, `before`).                                               |
+| `get(id, options?)`              | Load a container; optional `{ compatible?: boolean }`.                                                        |
+| `create(opts)`                   | Create a container; returns a **`Container`** instance.                                                       |
 | `run(image, command?, options?)` | Create, start, wait (unless `detach`), optionally return logs or throw **`ContainerError`** on non-zero exit. |
-| `exists(id)` | Whether the container exists. |
-| `remove(id, options?)` | Remove by id (`force`, `volumes`). |
-| `prune(filters?)` | Remove stopped containers. |
+| `exists(id)`                     | Whether the container exists.                                                                                 |
+| `remove(id, options?)`           | Remove by id (`force`, `volumes`).                                                                            |
+| `prune(filters?)`                | Remove stopped containers.                                                                                    |
 
 **`Container` instance:** `start`, `stop`, `restart`, `kill`, `pause`, `unpause`, `wait`, `remove`, `rename`, `inspect` (GET json), `logs` (string or `AsyncIterable` when `stream: true`), `top`, `diff`, `commit`, `reload`.
 
 ### Images — `client.images`
 
-| Method | Description |
-|--------|-------------|
-| `list(options?)` | List images (`name` maps to `reference` filter, `all`, `filters`). |
-| `get(name)` | Inspect by name/id. |
-| `pull(repository, options?)` | Pull (`tag`, `allTags`, `quiet`, `tlsVerify`). |
-| `push(repository, options?)` | Push (`tag`, `tlsVerify`). |
-| `build(options)` | POST tarball context to `/build`; requires `path` to context dir; uses `tar` via **`Bun.spawn`**. |
-| `search(term, options?)` | Search registries. |
-| `exists(name)` | Whether the image exists. |
-| `remove(name, options?)` | Remove by reference. |
-| `prune(options?)` | Prune unused images. |
+| Method                       | Description                                                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------- |
+| `list(options?)`             | List images (`name` maps to `reference` filter, `all`, `filters`).                                |
+| `get(name)`                  | Inspect by name/id.                                                                               |
+| `pull(repository, options?)` | Pull (`tag`, `allTags`, `quiet`, `tlsVerify`).                                                    |
+| `push(repository, options?)` | Push (`tag`, `tlsVerify`).                                                                        |
+| `build(options)`             | POST tarball context to `/build`; requires `path` to context dir; uses `tar` via **`Bun.spawn`**. |
+| `search(term, options?)`     | Search registries.                                                                                |
+| `exists(name)`               | Whether the image exists.                                                                         |
+| `remove(name, options?)`     | Remove by reference.                                                                              |
+| `prune(options?)`            | Prune unused images.                                                                              |
 
 **`Image` instance:** `history`, `tag`, `remove`, `reload`. Use **`get()`** / **`reload()`** for fresh inspect data (there is no separate `inspect()` on the instance).
 
 ### Pods — `client.pods`
 
-| Method | Description |
-|--------|-------------|
+| Method                   | Description                                |
+| ------------------------ | ------------------------------------------ |
 | `create(name, options?)` | Create pod (`name` plus JSON body fields). |
-| `list(options?)` | List pods (`filters`). |
-| `get(id)` | Inspect pod. |
-| `exists(id)` | Whether the pod exists. |
-| `remove(id, options?)` | Remove (`force`). |
-| `prune(filters?)` | Prune pods. |
-| `stats(options?)` | Pod stats (`all`). |
+| `list(options?)`         | List pods (`filters`).                     |
+| `get(id)`                | Inspect pod.                               |
+| `exists(id)`             | Whether the pod exists.                    |
+| `remove(id, options?)`   | Remove (`force`).                          |
+| `prune(filters?)`        | Prune pods.                                |
+| `stats(options?)`        | Pod stats (`all`).                         |
 
 **`Pod` instance:** `start`, `stop`, `restart`, `kill`, `pause`, `unpause`, `remove`, `top`, `reload`. There is no `inspect()` method; use **`reload()`** or **`pods.get()`**.
 
 ### Networks — `client.networks`
 
-| Method | Description |
-|--------|-------------|
+| Method                   | Description                                                                                          |
+| ------------------------ | ---------------------------------------------------------------------------------------------------- |
 | `create(name, options?)` | Create (`driver`, `dnsEnabled`, `networkDnsServers`, `enableIpv6`, `internal`, `labels`, `options`). |
-| `list(options?)` | List (`filters`). |
-| `get(key)` | Inspect. |
-| `exists(key)` | Whether the network exists. |
-| `remove(name, options?)` | Delete (`force`). |
-| `prune(filters?)` | Prune. |
+| `list(options?)`         | List (`filters`).                                                                                    |
+| `get(key)`               | Inspect.                                                                                             |
+| `exists(key)`            | Whether the network exists.                                                                          |
+| `remove(name, options?)` | Delete (`force`).                                                                                    |
+| `prune(filters?)`        | Prune.                                                                                               |
 
 **`Network` instance:** `connect`, `disconnect`, `remove`, `reload`.
 
 ### Volumes — `client.volumes`
 
-| Method | Description |
-|--------|-------------|
+| Method                    | Description                                |
+| ------------------------- | ------------------------------------------ |
 | `create(name?, options?)` | Create (`driver`, `driverOpts`, `labels`). |
-| `list(options?)` | List (`filters`). |
-| `get(volumeId)` | Load model from inspect. |
-| `exists(key)` | Whether the volume exists. |
-| `remove(name, options?)` | Remove (`force`). |
-| `prune(filters?)` | Prune. |
+| `list(options?)`          | List (`filters`).                          |
+| `get(volumeId)`           | Load model from inspect.                   |
+| `exists(key)`             | Whether the volume exists.                 |
+| `remove(name, options?)`  | Remove (`force`).                          |
+| `prune(filters?)`         | Prune.                                     |
 
 **`Volume` instance:** `inspect`, `remove`, `reload`.
 
 ### Secrets — `client.secrets`
 
-| Method | Description |
-|--------|-------------|
+| Method                         | Description                                                                         |
+| ------------------------------ | ----------------------------------------------------------------------------------- |
 | `create(name, data, options?)` | Create (`labels`, `driver`); `data` is string or `Buffer` (sent base64 for binary). |
-| `list(options?)` | List (`filters`). |
-| `get(secretId)` | Inspect. |
-| `exists(key)` | Whether the secret exists (GET json). |
-| `remove(secretId, options?)` | Delete (`all`). |
+| `list(options?)`               | List (`filters`).                                                                   |
+| `get(secretId)`                | Inspect.                                                                            |
+| `exists(key)`                  | Whether the secret exists (GET json).                                               |
+| `remove(secretId, options?)`   | Delete (`all`).                                                                     |
 
 **`Secret` instance:** `remove`.
 
 ### Manifests — `client.manifests`
 
-| Method | Description |
-|--------|-------------|
-| `create(name, images?, all?)` | Create manifest list. |
-| `get(key)` | Inspect. |
-| `exists(key)` | Whether the manifest exists. |
-| `list()` | **Throws** — the service does not expose list in this client. |
-| `removeManifest(name)` | Delete manifest by name. |
+| Method                        | Description                                                   |
+| ----------------------------- | ------------------------------------------------------------- |
+| `create(name, images?, all?)` | Create manifest list.                                         |
+| `get(key)`                    | Inspect.                                                      |
+| `exists(key)`                 | Whether the manifest exists.                                  |
+| `list()`                      | **Throws** — the service does not expose list in this client. |
+| `removeManifest(name)`        | Delete manifest by name.                                      |
 
 **`Manifest` instance:** `add`, `push`, `remove` (by digest), `reload`.
 
 ### Quadlets — `client.quadlets`
 
-| Method | Description |
-|--------|-------------|
-| `list(options?)` | List quadlets (`filters`). |
-| `get(name)` | Resolve by filtering list. |
-| `install(files, options?)` | POST tarball or `FormData` (`replace`, `reloadSystemd`). |
-| `getContents(name)` | Raw unit file contents. |
-| `delete(name?, options?)` | Delete one or **`all: true`** (`force`, `ignore`, `reloadSystemd`). |
-| `exists(name)` | Whether the quadlet exists. |
+| Method                     | Description                                                         |
+| -------------------------- | ------------------------------------------------------------------- |
+| `list(options?)`           | List quadlets (`filters`).                                          |
+| `get(name)`                | Resolve by filtering list.                                          |
+| `install(files, options?)` | POST tarball or `FormData` (`replace`, `reloadSystemd`).            |
+| `getContents(name)`        | Raw unit file contents.                                             |
+| `delete(name?, options?)`  | Delete one or **`all: true`** (`force`, `ignore`, `reloadSystemd`). |
+| `exists(name)`             | Whether the quadlet exists.                                         |
 
 **`Quadlet` instance:** `getContents`, `delete`.
 
 ### System — `client.system`
 
-| Method | Description |
-|--------|-------------|
-| `ping()` | `HEAD /_ping`. |
-| `info()` | GET `/info`. |
-| `version(options?)` | GET `/version`; can strip `APIVersion` when `apiVersion: false`. |
-| `df()` | Disk usage summary. |
+| Method                      | Description                                                                                  |
+| --------------------------- | -------------------------------------------------------------------------------------------- |
+| `ping()`                    | `HEAD /_ping`.                                                                               |
+| `info()`                    | GET `/info`.                                                                                 |
+| `version(options?)`         | GET `/version`; can strip `APIVersion` when `apiVersion: false`.                             |
+| `df()`                      | Disk usage summary.                                                                          |
 | `login(username, options?)` | POST **`/auth`** with **`compatible: true`** (`password`, `email`, `registry`, `tlsVerify`). |
 
 ### Events — `client.events`
 
-| Method | Description |
-|--------|-------------|
+| Method           | Description                                                                                                                                     |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `list(options?)` | Async generator over `/events` with `stream: true`. Yields lines as strings, or parsed objects if `decode: true` (`since`, `until`, `filters`). |
 
 There is no separate **`stream()`** method; use **`for await … of client.events.list()`**.

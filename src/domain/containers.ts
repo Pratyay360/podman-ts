@@ -84,8 +84,7 @@ export class Container extends PodmanResource {
       `/containers/${this.id}/wait`,
       {
         params: {
-          condition:
-            cond === undefined ? undefined : Array.isArray(cond) ? cond : [cond],
+          condition: cond === undefined ? undefined : Array.isArray(cond) ? cond : [cond],
           interval: options.interval,
         },
       },
@@ -347,7 +346,9 @@ export class Container extends PodmanResource {
   }
 
   async runHealthcheck(): Promise<Record<string, unknown>> {
-    const res = await this.client.get<Record<string, unknown>>(`/containers/${this.id}/healthcheck`);
+    const res = await this.client.get<Record<string, unknown>>(
+      `/containers/${this.id}/healthcheck`,
+    );
     res.raiseForStatus();
     return res.data;
   }
