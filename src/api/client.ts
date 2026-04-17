@@ -149,7 +149,12 @@ export class APIClient {
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise((r) => setTimeout(r, ms));
+    const timerHost = globalThis as unknown as {
+      setTimeout: (handler: () => void, timeout?: number) => unknown;
+    };
+    return new Promise((resolve) => {
+      timerHost.setTimeout(resolve, ms);
+    });
   }
 
   private async fetchWithRetry(
@@ -236,8 +241,4 @@ export class APIClient {
   options<T = unknown>(path: string, config?: RequestConfig): Promise<APIResponse<T>> {
     return this.request<T>("OPTIONS", path, config);
   }
-}
-
-function setTimeout(r: (value: void | PromiseLike<void>) => void, ms: number): void {
-  throw new Error("Function not implemented.");
 }
