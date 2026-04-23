@@ -9,7 +9,6 @@ on:
 permissions:
   contents: write
   id-token: write
-  packages: write
 
 jobs:
   verify:
@@ -93,68 +92,6 @@ jobs:
         run: npx jsr publish
         env:
           JSR_TOKEN: ${{ secrets.JSR_TOKEN }}
-
-  publish-github-packages:
-    name: Publish to GitHub Packages
-    runs-on: ubuntu-latest
-    needs: verify
-    if: ${{ secrets.GITHUB_PACKAGES_TOKEN != '' }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Setup Node.js for GitHub Packages
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          registry-url: https://npm.pkg.github.com
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Build package
-        run: bun run build
-
-      - name: Publish to GitHub Packages
-        run: npm publish --registry https://npm.pkg.github.com
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_PACKAGES_TOKEN }}
-
-  publish-other-registry:
-    name: Publish to custom npm-compatible registry
-    runs-on: ubuntu-latest
-    needs: verify
-    if: ${{ secrets.OTHER_REGISTRY_TOKEN != '' && vars.OTHER_REGISTRY_URL != '' }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Setup Node.js for custom registry
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          registry-url: ${{ vars.OTHER_REGISTRY_URL }}
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Build package
-        run: bun run build
-
-      - name: Publish to custom registry
-        run: npm publish --registry "${{ vars.OTHER_REGISTRY_URL }}"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.OTHER_REGISTRY_TOKEN }}
 
   create-release:
     name: Create GitHub Release
