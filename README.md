@@ -273,6 +273,19 @@ bun test
 bun run build
 ```
 
+## Release automation
+
+Publishing is automated by `.github/workflows/publish.yml`.
+
+- Push a version tag like `v1.2.3` (or run the workflow manually) to trigger release CI/CD.
+- The workflow verifies lint/typecheck/test/build before any publish step runs.
+- Registries are published conditionally based on configured GitHub secrets/variables:
+  - npm: `NPM_TOKEN`
+  - JSR: `JSR_TOKEN`
+  - GitHub Packages: `GITHUB_PACKAGES_TOKEN`
+  - Optional custom npm-compatible registry: `OTHER_REGISTRY_TOKEN` + repository variable `OTHER_REGISTRY_URL`
+- A GitHub release is created automatically for version tags (`v*`).
+
 ## License
 
 Apache-2.0
