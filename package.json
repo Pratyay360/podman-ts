@@ -1,6 +1,6 @@
 {
   "name": "@pratyay360/podman-ts",
-  "version": "1.1.1",
+  "version": "1.0.2",
   "private": false,
   "description": "TypeScript bindings for the Podman RESTful API (libpod)",
   "keywords": [
@@ -47,15 +47,11 @@
   },
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts --target es2022 --out-dir dist",
-    "prepare": "bun run lint && bun run build",
+    "prepare": "npm run build",
     "typecheck": "tsc --noEmit",
-    "test": "bun test",
-    "lint": "bun oxlint .",
-    "format": "bun oxfmt . --write"
+    "test": "npm test"
   },
   "dependencies": {
-    "oxfmt": "^0.45.0",
-    "oxlint": "^1.61.0",
     "smol-toml": "^1.6.1"
   },
   "devDependencies": {
@@ -66,6 +62,6 @@
   },
   "engines": {
     "bun": ">=1.0",
-    "node": ">=18"
+    "node": ">=20"
   }
 }
