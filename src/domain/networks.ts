@@ -29,6 +29,29 @@ export class Network extends PodmanResource {
     res.raiseForStatus();
   }
 
+  async inspect(): Promise<Record<string, unknown>> {
+    const res = await this.client.get<Record<string, unknown>>(
+      `/networks/${encodeURIComponent(this.name)}/json`,
+    );
+    res.raiseForStatus(NotFound);
+    return res.data;
+  }
+
+  /** Update DNS servers or other mutable network settings. */
+  async update(options: {
+    addDNSServers?: string[];
+    removeDNSServers?: string[];
+  }): Promise<void> {
+    const res = await this.client.post(`/networks/${encodeURIComponent(this.name)}/update`, {
+      data: prepareBody({
+        addDNSServers: options.addDNSServers,
+        removeDNSServers: options.removeDNSServers,
+      }),
+      headers: { "Content-Type": "application/json" },
+    });
+    res.raiseForStatus();
+  }
+
   async remove(options: { force?: boolean } = {}): Promise<void> {
     const res = await this.client.delete(`/networks/${encodeURIComponent(this.name)}`, {
       params: { force: options.force },

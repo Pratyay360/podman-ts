@@ -32,6 +32,42 @@ export class Image extends PodmanResource {
     return res.ok;
   }
 
+  /** Remove a tag from this image. */
+  async untag(repository: string, tag?: string): Promise<void> {
+    const res = await this.client.post(`/images/${this.id}/untag`, {
+      params: { repo: repository, tag },
+    });
+    res.raiseForStatus(ImageNotFound);
+  }
+
+  /** Return the image dependency tree. */
+  async tree(options: { whatrequires?: boolean } = {}): Promise<Record<string, unknown>> {
+    const res = await this.client.get<Record<string, unknown>>(`/images/${this.id}/tree`, {
+      params: { whatrequires: options.whatrequires },
+    });
+    res.raiseForStatus(ImageNotFound);
+    return res.data;
+  }
+
+  /** Report filesystem changes (adds, deletes, modifications). */
+  async changes(options: { parent?: string; diffType?: "all" | "container" | "image" } = {}): Promise<Array<Record<string, unknown>>> {
+    const res = await this.client.get<Array<Record<string, unknown>>>(`/images/${this.id}/changes`, {
+      params: { parent: options.parent, diffType: options.diffType },
+    });
+    res.raiseForStatus(ImageNotFound);
+    return res.data;
+  }
+
+  /** Export this image as a tar archive. */
+  async export(options: { format?: string; compress?: boolean } = {}): Promise<ArrayBuffer> {
+    const res = await this.client.get<ArrayBuffer>(`/images/${this.id}/get`, {
+      params: { format: options.format, compress: options.compress },
+      parseAs: "arraybuffer",
+    });
+    res.raiseForStatus(ImageNotFound);
+    return res.data;
+  }
+
   async remove(options: { force?: boolean } = {}): Promise<Record<string, unknown>[]> {
     const res = await this.client.delete<Record<string, unknown>[]>(`/images/${this.id}`, {
       params: { force: options.force },
@@ -243,6 +279,107 @@ export class ImagesManager extends Manager<Image> {
         tlsVerify: options.tlsVerify,
         listTags: options.listTags,
       },
+    });
+    res.raiseForStatus();
+    return res.data;
+  }
+
+  /**
+   * Export multiple images as a single tar archive.
+   * @param names - Image names/IDs to export.
+   */
+  async exportImages(
+    names: string[],
+    options: { format?: string; compress?: boolean } = {},
+  ): Promise<ArrayBuffer> {
+    const res = await this.client.get<ArrayBuffer>("/images/export", {
+      params: { names, format: options.format, compress: options.compress },
+      parseAs: "arraybuffer",
+    });
+    res.raiseForStatus();
+    return res.data;
+  }
+
+  /**
+   * Import an image from a tar archive (OCI or Docker format).
+   * @param data - Tar archive as ArrayBuffer or Uint8Array.
+   */
+  async importImage(
+    data: ArrayBuffer | Uint8Array,
+    options: {
+      changes?: string[];
+      message?: string;
+      reference?: string;
+      url?: string;
+    } = {},
+  ): Promise<Record<string, unknown>> {
+    const res = await this.client.post<Record<string, unknown>>("/images/import", {
+      params: {
+        changes: options.changes,
+        message: options.message,
+        reference: options.reference,
+        url: options.url,
+      },
+      data,
+      headers: { "Content-Type": "application/x-tar" },
+    });
+    res.raiseForStatus();
+    return res.data;
+  }
+
+  /**
+   * Load one or more images from a tar archive (docker save format).
+   * @param data - Tar archive as ArrayBuffer or Uint8Array.
+   */
+  async load(data: ArrayBuffer | Uint8Array): Promise<Record<string, unknown>> {
+    const res = await this.client.post<Record<string, unknown>>("/images/load", {
+      data,
+      headers: { "Content-Type": "application/x-tar" },
+    });
+    res.raiseForStatus();
+    return res.data;
+  }
+
+  /**
+   * Resolve an image short name to a fully-qualified reference.
+   */
+  async resolve(name: string): Promise<Record<string, unknown>> {
+    const res = await this.client.get<Record<string, unknown>>(
+      `/images/${encodeURIComponent(name)}/resolve`,
+    );
+    res.raiseForStatus(ImageNotFound);
+    return res.data;
+  }
+
+  /**
+   * Copy an image from one host to another via SCP.
+   */
+  async scp(
+    name: string,
+    options: {
+      destination?: string;
+      quiet?: boolean;
+    } = {},
+  ): Promise<Record<string, unknown>> {
+    const res = await this.client.post<Record<string, unknown>>(
+      `/images/scp/${encodeURIComponent(name)}`,
+      {
+        params: { destination: options.destination, quiet: options.quiet },
+      },
+    );
+    res.raiseForStatus(ImageNotFound);
+    return res.data;
+  }
+
+  /**
+   * Remove one or more images from storage (batch delete).
+   */
+  async removeAll(
+    names: string[],
+    options: { force?: boolean } = {},
+  ): Promise<Record<string, unknown>> {
+    const res = await this.client.delete<Record<string, unknown>>("/images/remove", {
+      params: { images: names, force: options.force },
     });
     res.raiseForStatus();
     return res.data;

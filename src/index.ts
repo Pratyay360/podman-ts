@@ -99,5 +99,18 @@ export { RegistryData } from "./domain/registry_data";
 // ── Domain: JSON stream ───────────────────────────────────────────────────────
 export { jsonStream, lineStream } from "./domain/json_stream";
 
+// ── Domain: Kube ──────────────────────────────────────────────────────────────
+export { KubeManager } from "./domain/kube";
+export type {
+  GenerateKubeOptions,
+  GenerateSystemdOptions,
+  KubeApplyOptions,
+  PlayKubeOptions,
+} from "./domain/kube";
+
+// ── Domain: Artifacts ─────────────────────────────────────────────────────────
+export { Artifact, ArtifactsManager } from "./domain/artifacts";
+export type { ArtifactAddOptions, ArtifactPullOptions } from "./domain/artifacts";
+
 // ── Base classes ──────────────────────────────────────────────────────────────
 export { PodmanResource, Manager } from "./domain/manager";

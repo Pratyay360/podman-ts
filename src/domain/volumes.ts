@@ -19,6 +19,25 @@ export class Volume extends PodmanResource {
     return res.data;
   }
 
+  /** Export volume contents as a tar archive. */
+  async export(): Promise<ArrayBuffer> {
+    const res = await this.client.get<ArrayBuffer>(
+      `/volumes/${encodeURIComponent(this.name ?? "")}/export`,
+      { parseAs: "arraybuffer" },
+    );
+    res.raiseForStatus();
+    return res.data;
+  }
+
+  /** Import volume contents from a tar archive. */
+  async importTar(data: ArrayBuffer | Uint8Array): Promise<void> {
+    const res = await this.client.post(`/volumes/${encodeURIComponent(this.name ?? "")}/import`, {
+      data,
+      headers: { "Content-Type": "application/x-tar" },
+    });
+    res.raiseForStatus();
+  }
+
   async remove(options: { force?: boolean } = {}): Promise<void> {
     const res = await this.client.delete(`/volumes/${encodeURIComponent(this.name ?? "")}`, {
       params: { force: options.force },

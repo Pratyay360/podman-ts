@@ -53,4 +53,46 @@ export class SystemManager {
     res.raiseForStatus();
     return res.data;
   }
+
+  /**
+   * Prune unused data (containers, images, volumes, networks).
+   */
+  async prune(options: {
+    all?: boolean;
+    external?: boolean;
+    filters?: Record<string, string>;
+    volumes?: boolean;
+  } = {}): Promise<Record<string, unknown>> {
+    const res = await this.client.post<Record<string, unknown>>("/system/prune", {
+      params: {
+        all: options.all,
+        external: options.external,
+        volumes: options.volumes,
+        filters: options.filters ? JSON.stringify(options.filters) : undefined,
+      },
+    });
+    res.raiseForStatus();
+    return res.data;
+  }
+
+  /**
+   * Perform consistency checks on storage, optionally removing items that fail.
+   */
+  async check(options: {
+    quick?: boolean;
+    repair?: boolean;
+    repairLossy?: boolean;
+    unreferencedLayerMaximumAge?: string;
+  } = {}): Promise<Record<string, unknown>> {
+    const res = await this.client.post<Record<string, unknown>>("/system/check", {
+      params: {
+        quick: options.quick,
+        repair: options.repair,
+        repairLossy: options.repairLossy,
+        unreferencedLayerMaximumAge: options.unreferencedLayerMaximumAge,
+      },
+    });
+    res.raiseForStatus();
+    return res.data;
+  }
 }

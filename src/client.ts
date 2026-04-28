@@ -14,10 +14,12 @@
 import { join } from "node:path";
 import process from "node:process";
 import { APIClient } from "./api/client";
+import { ArtifactsManager } from "./domain/artifacts";
 import { PodmanConfig } from "./domain/config";
 import { ContainersManager } from "./domain/containers";
 import { EventsManager } from "./domain/events";
 import { ImagesManager } from "./domain/images";
+import { KubeManager } from "./domain/kube";
 import { ManifestsManager } from "./domain/manifests";
 import { NetworksManager } from "./domain/networks";
 import { PodsManager } from "./domain/pods";
@@ -59,6 +61,8 @@ export class PodmanClient {
   private _quadlets?: QuadletsManager;
   private _events?: EventsManager;
   private _system?: SystemManager;
+  private _kube?: KubeManager;
+  private _artifacts?: ArtifactsManager;
 
   constructor(options: PodmanClientOptions = {}) {
     let baseUrl = options.baseUrl;
@@ -136,6 +140,14 @@ export class PodmanClient {
 
   get system(): SystemManager {
     return (this._system ??= new SystemManager(this.api));
+  }
+
+  get kube(): KubeManager {
+    return (this._kube ??= new KubeManager(this.api));
+  }
+
+  get artifacts(): ArtifactsManager {
+    return (this._artifacts ??= new ArtifactsManager(this.api));
   }
 
   get ping(): Promise<boolean> {

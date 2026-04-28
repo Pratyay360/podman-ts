@@ -60,6 +60,12 @@ export class Pod extends PodmanResource {
     return res.data;
   }
 
+  async inspect(): Promise<Record<string, unknown>> {
+    const res = await this.client.get<Record<string, unknown>>(`/pods/${this.id}/json`);
+    res.raiseForStatus(NotFound);
+    return res.data;
+  }
+
   async reload(): Promise<void> {
     const res = await this.client.get<Record<string, unknown>>(`/pods/${this.id}/json`);
     res.raiseForStatus(NotFound);
