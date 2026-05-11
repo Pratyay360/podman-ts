@@ -1,4 +1,8 @@
 # podman-ts
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Pratyay360/podman-ts)
+
+[mintlify_docs](https://mintlify.wiki/Pratyay360/podman-ts)
+
 
 TypeScript/Bun bindings for the Podman RESTful API (libpod). This library provides a high-level, type-safe interface for managing containers, images, pods, networks, volumes, secrets, manifests, quadlets, and more.
 
